@@ -57,6 +57,7 @@ types {
     application/xhtml+xml                 xhtml;
     application/xspf+xml                  xspf;
     application/zip                       zip;
+	application/rdf+xml                   rdf;
 
     application/octet-stream              bin exe dll;
     application/octet-stream              deb;
