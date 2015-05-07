@@ -1,0 +1,12 @@
+{
+	"directories": {
+		"repos": "/home/owlpub/repos/",
+		"web": "/home/owlpub/web/"
+	},
+	"repos": [
+		{
+			"name": "foodontology",
+			"clone_url": "https://github.com/ailabitmo/food-ontology.git"
+		}
+	]
+}
