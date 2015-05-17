@@ -1,7 +1,8 @@
-import os
-import shutil
+from os.path import realpath, join, dirname, exists
+from os import makedirs
+from shutil import copy
+from git import Repo
 from DocGenerator import DocGenerator
-from git import Repo, InvalidGitRepositoryError
 
 
 class RepoHandler:
@@ -9,39 +10,26 @@ class RepoHandler:
     repo = None
     config = None
 
-    def __init__(self, repo_config):
-        if self.check(repo_config):
-            self.repo = Repo(repo_config['repo_directory'])
-        else:
-            self.repo = self.clone(repo_config)
-        self.config = repo_config
-
-    def check(self, repo_config):
-        if not os.path.isdir(repo_config['repo_directory']):
-            return False
+    def __init__(self, config):
         try:
-            Repo(repo_config['repo_directory'])
-        except InvalidGitRepositoryError:
-            return False
-        return True
+            repo = Repo(config['directory'])
+        except:
+            repo = Repo.clone_from(config['clone_url'], config['directory'])
+        self.repo = repo
+        self.config = config
 
-    def clone(self, repo_config):
-        return Repo.clone_from(repo_config['clone_url'], repo_config['repo_directory'])
-
-    def pull(self):
+    def sync(self):
         self.repo.remotes['origin'].pull()
 
     def regenerate(self):
-        if self.config['ontology_file'] is None:
-            for file in os.listdir(self.config['repo_directory']):
-                if file.endswith(".owl"):
-                    self.config['ontology_file'] = os.path.join(self.config['repo_directory'], file)
+        generator = DocGenerator()
 
-        doc = DocGenerator(self.config['ontology_file'])
-
-        if not os.path.isdir(self.config['web_directory']):
-            os.makedirs(self.config['web_directory'])
-
-        output_file = os.path.join(self.config['web_directory'], os.path.splitext(os.path.basename(self.config['ontology_file']))[0] + '.html')
-        doc.generate(template_path=self.config['template_file'], output_file=output_file)
-        shutil.copy(self.config['ontology_file'], os.path.join(self.config['web_directory'], os.path.basename(self.config['ontology_file'])))
+        for i in self.config['ontologies']:
+            if i['template'] is None:
+                template_path = join(dirname(realpath(__file__)), "template.html")
+            else:
+                template_path = i['template']
+            if not exists(dirname(i['web_doc'])):
+                makedirs(dirname(i['web_doc']))
+            generator.generate(i['ontology'], i['web_doc'], template_path)
+            copy(i['ontology'], i['web_ontology'])

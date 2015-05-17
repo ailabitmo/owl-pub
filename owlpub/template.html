@@ -1,0 +1,73 @@
+<pre>
+{% if ontology_title is defined %}
+title: {{ ontology_title }}
+{% endif %}
+
+{% if ontology_uri is defined %}
+iri: {{ ontology_uri }}
+{% endif %}
+
+{% if date is defined %}
+date: {{ date }}
+{% endif %}
+
+{% if current_version is defined %}
+current version: {{ current_version }}
+{% endif %}
+
+{% if creators %}
+autors:
+	{% for creator in creators %}
+	{{ creator }}
+	{% endfor %}
+{% endif %}
+
+{% if imported_ontologies %}
+imported ontologies:
+    {% for ontology in imported_ontologies %}
+    {{ ontology }}
+    {% endfor %}
+{% endif %}
+
+{% if abstract is defined %}
+Abstract
+=====
+{{ abstract }}
+{% endif %}
+
+{% if introduction is defined %}
+Introduction
+=====
+{{ introduction }}
+{% endif %}
+
+Classes
+=====
+{% for class in classes %}
+    {{ class.label }}
+    iri: {{ class.uri}}
+    {% if class.super_classes %}
+        has super-classes
+        {% for super in class.super_classes %}
+            {{ super }}
+        {% endfor %}
+    {% endif %}
+    {% if class.sub_classes %}
+        has sub-classes
+        {% for sub in class.sub_classes %}
+            {{ sub }}
+        {% endfor %}
+    {% endif %}
+    {% if class.domain_for %}
+        is in domain of
+        {% for i in class.domain_for %}
+            {{ i }}
+        {% endfor %}
+    {% endif %}
+    {% if class.in_range %}
+        is in range of
+        {% for i in class.in_range %}
+            {{ i }}
+        {% endfor %}
+    {% endif %}
+{% endfor %}

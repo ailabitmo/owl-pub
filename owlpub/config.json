@@ -1,12 +1,35 @@
 {
 	"directories": {
-		"repos": "/home/owlpub/repos/",
-		"web": "/home/owlpub/web/"
+		"repos": "E:\\Projects\\OwlPub\\repos",
+		"web": "E:\\Projects\\OwlPub\\web\\"
 	},
 	"repos": [
 		{
-			"name": "foodontology",
-			"clone_url": "https://github.com/ailabitmo/food-ontology.git"
+			"clone_url": "https://github.com/ailabitmo/food-ontology.git",
+			"webhook_id": 2,
+			"ontologies": [
+				{
+					"file": "food.owl",
+					"webname": "foodontology"
+				}
+			]
+		},
+		{
+			"clone_url": "https://github.com/semiotproject/ontologies.git",
+			"ontologies": [
+				{
+					"file": "emtr/electricmeters.owl",
+					"webname": "emtr"
+				},
+				{
+					"file": "hmtr/heatmeters.owl",
+					"webname": "hmtr"
+				},
+				{
+					"file": "ssncom/ssncom.owl",
+					"webname": "ssncom"
+				}
+			]
 		}
 	]
 }
