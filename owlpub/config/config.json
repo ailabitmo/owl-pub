@@ -1,0 +1,61 @@
+{
+	"directories": {
+		"repos": "E:\\Projects\\OwlPub\\repos",
+		"web": "E:\\Projects\\OwlPub\\web\\"
+	},
+	"repos": [
+		{
+			"clone_url": "https://github.com/ailabitmo/food-ontology.git",
+			"webhook_id": 2,
+			"ontologies": [
+				{
+					"ontology": "food.owl",
+					"export": [
+						"owl",
+						"ttl"
+					],
+					"directory": "foodontology"
+				}
+			]
+		},
+		{
+            "clone_url": "https://github.com/Nukker7/test-webhook.git",
+            "ontologies": [
+                {
+                    "ontology": "motif-ontology1.1.owl",
+                    "export": [
+                        "owl",
+                        "ttl"
+                    ],
+                    "directory": "motif"
+                }
+            ]
+        },
+		{
+			"clone_url": "https://github.com/semiotproject/ontologies.git",
+			"ontologies": [
+				{
+					"ontology": "emtr/electricmeters.owl",
+					"export": [
+						"owl"
+					],
+					"directory": "emtr"
+				},
+				{
+					"ontology": "hmtr/heatmeters.owl",
+					"export": [
+						"owl"
+					],
+					"directory": "hmtr"
+				},
+				{
+					"ontology": "ssncom/ssncom.owl",
+					"export": [
+						"owl"
+					],
+					"directory": "ssncom"
+				}
+			]
+		}
+	]
+}

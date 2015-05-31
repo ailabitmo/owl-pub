@@ -1,73 +1,573 @@
-<pre>
-{% if ontology_title is defined %}
-title: {{ ontology_title }}
-{% endif %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            body {
+                font: 14pt Tahoma;
+                padding: 0 3em 0 3em;
+            }
+            h1, h2, h3, h4, h5, h6 {
+                font-weight: bold;
+                margin: 0 0 1em 0;
+                color: #777;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            h2 {
+                font-size: 1.8em;
+            }
+            h3 {
+                font-size: 1.6em;
+            }
+            h4 {
+                font-size: 1.4em;
+            }
+            h5 {
+                font-size: 1.2em;
+            }
+            h6 {
+                font-size: 1em;
+            }
 
-{% if ontology_uri is defined %}
-iri: {{ ontology_uri }}
-{% endif %}
+            hr {
+                border: solid 1px #000;
+                margin: 2em 0 2em 0 ;
+            }
 
-{% if date is defined %}
-date: {{ date }}
-{% endif %}
+            section {
+                margin-bottom: 1em;
+            }
 
-{% if current_version is defined %}
-current version: {{ current_version }}
-{% endif %}
+            #classes section, #object_properties section, #data_properties section, #annotation_properties section, #namespaces {
+                border: 1px solid #000;
+                padding: 0.5em;
+            }
 
-{% if creators %}
-autors:
-	{% for creator in creators %}
-	{{ creator }}
-	{% endfor %}
-{% endif %}
+            footer {
+                padding: 2em;
+                text-align: center;
+                background: #333;
+                color: #fff;
+            }
+        </style>
+    </head>
+    <body>
+        {% if ontology_title is defined %}
+        <header>
+            <h1>{{ ontology_title }}</h1>
+        </header>
+        {% endif %}
 
-{% if imported_ontologies %}
-imported ontologies:
-    {% for ontology in imported_ontologies %}
-    {{ ontology }}
-    {% endfor %}
-{% endif %}
+        <section id="meta">
 
-{% if abstract is defined %}
-Abstract
-=====
-{{ abstract }}
-{% endif %}
+            {% if ontology_iri %}
+            <div>
+                <h6>IRI:</h6>
+                <p>{{ ontology_iri }}</p>
+            </div>
+            {% endif %}
 
-{% if introduction is defined %}
-Introduction
-=====
-{{ introduction }}
-{% endif %}
+            {% if ontology_version_iri %}
+            <div>
+                <h6>Version IRI:</h6>
+                <p>{{ ontology_version_iri }}</p>
+            </div>
+            {% endif %}
 
-Classes
-=====
-{% for class in classes %}
-    {{ class.label }}
-    iri: {{ class.uri}}
-    {% if class.super_classes %}
-        has super-classes
-        {% for super in class.super_classes %}
-            {{ super }}
-        {% endfor %}
-    {% endif %}
-    {% if class.sub_classes %}
-        has sub-classes
-        {% for sub in class.sub_classes %}
-            {{ sub }}
-        {% endfor %}
-    {% endif %}
-    {% if class.domain_for %}
-        is in domain of
-        {% for i in class.domain_for %}
-            {{ i }}
-        {% endfor %}
-    {% endif %}
-    {% if class.in_range %}
-        is in range of
-        {% for i in class.in_range %}
-            {{ i }}
-        {% endfor %}
-    {% endif %}
-{% endfor %}
+            {% if ontology_date %}
+            <div>
+                <h6>Date:</h6>
+                <p>{{ ontology_date }}</p>
+            </div>
+            {% endif %}
+
+            {% if ontology_version %}
+            <div>
+                <h6>Current version:</h6>
+                <p>{{ ontology_version }}</p>
+            </div>
+            {% endif %}
+
+            {% if ontology_creators %}
+            <div>
+                <h6>Creators:</h6>
+                {% for creator in ontology_creators %}
+                <p>{{ creator }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if ontology_constributors %}
+            <div>
+                <h6>Contributors:</h6>
+                {% for contributor in ontology_contributors %}
+                <p>{{ contributor }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if imported_ontologies %}
+            <div>
+                <h6>Imported Ontologies:</h6>
+                {% for ontology in imported_ontologies %}
+                <p><a href="#">{{ ontology }}</a></p>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+        </section>
+
+        <hr>
+
+        <section id="table_of_contents">
+            <h3>Table of contents</h3>
+            <ol>
+                {% if abstract %}
+                <li><a href="#abstract">Abstract</a></li>
+                {% endif %}
+                {% if introduction %}
+                <li><a href="#introduction">Introduction</a></li>
+                {% endif %}
+                {% if classes %}
+                <li><a href="#classes">Classes</a></li>
+                {% endif %}
+                {% if object_properties %}
+                <li><a href="#object_properties">Object properties</a></li>
+                {% endif %}
+                {% if data_properties %}
+                <li><a href="#data_properties">Data properties</a></li>
+                {% endif %}
+                {% if annotation_properties %}
+                <li><a href="#annotation_properties">Annotation properties</a></li>
+                {% endif %}
+                {% if namespaces %}
+                <li><a href="#namespaces">Namespace declarations</a></li>
+                {% endif %}
+            </ol>
+        </section>
+
+        <hr>
+
+        {% if abstract %}
+        <section id="abstract">
+            <h3>Abstract</h3>
+            <p>{{ abstract }}</p>
+        </section>
+        {% endif %}
+
+        <hr>
+
+        {% if introduction %}
+        <section id="introduction">
+            <h3>Introduction</h3>
+            <p>{{ introduction }}</p>
+        </section>
+        {% endif %}
+
+        <hr>
+
+        {% if classes %}
+        <section id="classes">
+            <h3>Classes</h3>
+
+            <section>
+                {% for class in classes %}
+                <a href="#{{ class.iri|anchorFromIRI }}">{{ class.label }}</a>
+                {% endfor %}
+            </section>
+
+            {% for class in classes %}
+            <section id="{{ class.iri|anchorFromIRI }}">
+                <h4>{{ class.label }}</h4>
+
+                <p>
+                    <strong>IRI:</strong>
+                    {{ class.iri}}
+                </p>
+
+                {% if class.comment %}
+                <p>
+                    {{ class.comment }}
+                </p>
+                {% endif  %}
+
+                {% if class.super_classes %}
+                <div>
+                    <h5>has super-classes</h5>
+                    <p>
+                    {% for i in class.super_classes %}
+                        <a href="{{ i }}">{{ i }}</a>
+                    {% endfor %}
+                    </p>
+                </div>
+                {% endif %}
+
+                {% if class.sub_classes %}
+                <div>
+                    <h5>has sub-classes</h5>
+                    <p>
+                    {% for i in class.sub_classes %}
+                        <a href="{{ i }}">{{ i }}</a>
+                    {% endfor %}
+                    </p>
+                </div>
+                {% endif %}
+
+                {% if class.domain_for %}
+                <div>
+                    <h5>is in domain of</h5>
+                    <p>
+                    {% for i in class.domain_for %}
+                        <a href="{{ i }}">{{ i }}</a>
+                    {% endfor %}
+                    </p>
+                </div>
+                {% endif %}
+
+                {% if class.in_range %}
+                <div>
+                    <h5>is in range of</h5>
+                    <p>
+                    {% for i in class.in_range %}
+                        <a href="{{ i }}">{{ i }}</a>
+                    {% endfor %}
+                    </p>
+                </div>
+                {% endif %}
+
+            </section>
+            {% endfor %}
+
+        </section>
+
+        <hr>
+        {% endif %}
+
+        {% if object_properties %}
+        <section id="object_properties">
+            <h3>Object properties</h3>
+
+            <section>
+                {% for property in object_properties %}
+                    {% if property.label %}
+                    <a href="#{{ property.iri|anchorFromIRI }}">{{ property.label }}</a>
+                    {% else %}
+                    <a href="#{{ property.iri|anchorFromIRI }}">{{ property.iri }}</a>
+                    {% endif %}
+                {% endfor %}
+            </section>
+
+            {% for property in object_properties %}
+            <section id="{{ property.iri|anchorFromIRI }}">
+                <h4>{{ property.label }}</h4>
+
+                <p>
+                    <strong>IRI:</strong>
+                    {{ property.iri}}
+                </p>
+
+                {% if property.comment %}
+                <p>
+                    {{ property.comment }}
+                </p>
+                {% endif %}
+
+                {% if property.super_properties %}
+                <div>
+                    <h5>has super-properties</h5>
+                    <p>
+                    {% for i in property.super_properties %}
+                        <a href="{{ i }}">{{ i }}</a>
+                    {% endfor %}
+                    </p>
+                </div>
+                {% endif %}
+
+                {% if property.sub_properties %}
+                <div>
+                    <h5>has sub-properties</h5>
+                    <p>
+                    {% for i in property.sub_properties %}
+                        <a href="{{ i }}">{{ i }}</a>
+                    {% endfor %}
+                    </p>
+                </div>
+                {% endif %}
+
+                {% if property.domain_for %}
+                <div>
+                    <h5>is in domain of</h5>
+                    <p>
+                    {% for i in property.domain_for %}
+                        <a href="{{ i }}">{{ i }}</a>
+                    {% endfor %}
+                    </p>
+                </div>
+                {% endif %}
+
+                {% if property.has_domain %}
+                <div>
+                    <h5>has domain</h5>
+                    <p>
+                    {% for i in property.has_domain %}
+                        <a href="{{ i }}">{{ i }}</a>
+                    {% endfor %}
+                    </p>
+                </div>
+                {% endif %}
+
+                {% if property.in_range %}
+                <div>
+                    <h5>is in range of</h5>
+                    <p>
+                    {% for i in property.in_range %}
+                        <a href="{{ i }}">{{ i }}</a>
+                    {% endfor %}
+                    </p>
+                </div>
+                {% endif %}
+
+                {% if property.has_range %}
+                <div>
+                    <h5>has range</h5>
+                    <p>
+                    {% for i in property.has_range %}
+                        <a href="{{ i }}">{{ i }}</a>
+                    {% endfor %}
+                    </p>
+                </div>
+                {% endif %}
+
+            </section>
+            {% endfor %}
+
+        </section>
+
+        <hr>
+        {% endif %}
+
+        {% if data_properties %}
+        <section id="data_properties">
+            <h3>Data properties</h3>
+
+            <section>
+                {% for property in data_properties %}
+                    {% if property.label %}
+                    <a href="#{{ property.iri|anchorFromIRI }}">{{ property.label }}</a>
+                    {% else %}
+                    <a href="#{{ property.iri|anchorFromIRI }}">{{ property.iri }}</a>
+                    {% endif %}
+                {% endfor %}
+            </section>
+
+            {% for property in data_properties %}
+            <section id="{{ property.iri|anchorFromIRI }}">
+                <h4>{{ property.label }}</h4>
+
+                <p>
+                    <strong>IRI:</strong>
+                    {{ property.iri}}
+                </p>
+
+                {% if property.comment %}
+                <p>
+                    {{ property.comment }}
+                </p>
+                {% endif %}
+
+                {% if property.super_properties %}
+                <div>
+                    <h5>has super-properties</h5>
+                    <p>
+                    {% for i in property.super_properties %}
+                        <a href="{{ i }}">{{ i }}</a>
+                    {% endfor %}
+                    </p>
+                </div>
+                {% endif %}
+
+                {% if property.sub_properties %}
+                <div>
+                    <h5>has sub-properties</h5>
+                    <p>
+                    {% for i in property.sub_properties %}
+                        <a href="{{ i }}">{{ i }}</a>
+                    {% endfor %}
+                    </p>
+                </div>
+                {% endif %}
+
+                {% if property.domain_for %}
+                <div>
+                    <h5>is in domain of</h5>
+                    <p>
+                    {% for i in property.domain_for %}
+                        <a href="{{ i }}">{{ i }}</a>
+                    {% endfor %}
+                    </p>
+                </div>
+                {% endif %}
+
+                {% if property.has_domain %}
+                <div>
+                    <h5>has domain</h5>
+                    <p>
+                    {% for i in property.has_domain %}
+                        <a href="{{ i }}">{{ i }}</a>
+                    {% endfor %}
+                    </p>
+                </div>
+                {% endif %}
+
+                {% if property.in_range %}
+                <div>
+                    <h5>is in range of</h5>
+                    <p>
+                    {% for i in property.in_range %}
+                        <a href="{{ i }}">{{ i }}</a>
+                    {% endfor %}
+                    </p>
+                </div>
+                {% endif %}
+
+                {% if property.has_range %}
+                <div>
+                    <h5>has range</h5>
+                    <p>
+                    {% for i in property.has_range %}
+                        <a href="{{ i }}">{{ i }}</a>
+                    {% endfor %}
+                    </p>
+                </div>
+                {% endif %}
+
+            </section>
+            {% endfor %}
+
+        </section>
+
+        <hr>
+        {% endif %}
+
+        {% if annotation_properties %}
+        <section id="annotation_properties">
+            <h3>Annotation properties</h3>
+
+            <section>
+                {% for property in annotation_properties %}
+                    {% if property.label %}
+                    <a href="#{{ property.iri|anchorFromIRI }}">{{ property.label }}</a>
+                    {% else %}
+                    <a href="#{{ property.iri|anchorFromIRI }}">{{ property.iri }}</a>
+                    {% endif %}
+                {% endfor %}
+            </section>
+
+            {% for property in annotation_properties %}
+            <section>
+                <h4>{{ property.label }}</h4>
+
+                <p>
+                    <strong>IRI:</strong>
+                    {{ property.iri}}
+                </p>
+
+                {% if property.comment %}
+                <p>
+                    {{ property.comment }}
+                </p>
+                {% endif %}
+
+                {% if property.super_properties %}
+                <div>
+                    <h5>has super-properties</h5>
+                    <p>
+                    {% for i in property.super_properties %}
+                        <a href="{{ i }}">{{ i }}</a>
+                    {% endfor %}
+                    </p>
+                </div>
+                {% endif %}
+
+                {% if property.sub_properties %}
+                <div>
+                    <h5>has sub-properties</h5>
+                    <p>
+                    {% for i in property.sub_properties %}
+                        <a href="{{ i }}">{{ i }}</a>
+                    {% endfor %}
+                    </p>
+                </div>
+                {% endif %}
+
+                {% if property.domain_for %}
+                <div>
+                    <h5>is in domain of</h5>
+                    <p>
+                    {% for i in property.domain_for %}
+                        <a href="{{ i }}">{{ i }}</a>
+                    {% endfor %}
+                    </p>
+                </div>
+                {% endif %}
+
+                {% if property.has_domain %}
+                <div>
+                    <h5>has domain</h5>
+                    <p>
+                    {% for i in property.has_domain %}
+                        <a href="{{ i }}">{{ i }}</a>
+                    {% endfor %}
+                    </p>
+                </div>
+                {% endif %}
+
+                {% if property.in_range %}
+                <div>
+                    <h5>is in range of</h5>
+                    <p>
+                    {% for i in property.in_range %}
+                        <a href="{{ i }}">{{ i }}</a>
+                    {% endfor %}
+                    </p>
+                </div>
+                {% endif %}
+
+                {% if property.has_range %}
+                <div>
+                    <h5>has range</h5>
+                    <p>
+                    {% for i in property.has_range %}
+                        <a href="{{ i }}">{{ i }}</a>
+                    {% endfor %}
+                    </p>
+                </div>
+                {% endif %}
+
+            </section>
+            {% endfor %}
+
+        </section>
+
+        <hr>
+        {% endif %}
+
+        <section id="namespaces">
+
+            <h3>Namespace declarations</h3>
+
+            <div>
+            {% for k, v in namespaces %}
+                <h6>{{ k }}</h6>
+                <p>{{ v }}</p>
+            {% endfor %}
+            </div>
+
+        </section>
+
+        <footer>
+            owl-pub @ ITMO University 2015
+        </footer>
+    </body>
+</html>

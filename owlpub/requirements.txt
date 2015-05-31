@@ -1,0 +1,4 @@
+rdflib
+flask
+jinja2
+gitpython

@@ -32,7 +32,7 @@ class OwlPub:
 
     def loadConfig(self):
         try:
-            config_path = join(dirname(realpath(__file__)), 'config.json')
+            config_path = join(dirname(realpath(__file__)), 'config', 'config.json')
             with open(config_path) as config_file:
                 config = json.load(config_file)
             dir_repos = abspath(config['directories']['repos'])
@@ -68,21 +68,20 @@ class OwlPub:
         return repo_config
 
     def parseOntologyConfig(self, config, dir_repo, dir_web):
-        current_webdir = join(dir_web, config['webname'])
-        ontology_name = splitext(basename(config['file']))[0] + ".owl"
-        doc_name = splitext(basename(config['file']))[0] + ".html"
 
         ontology_config = {}
 
-        ontology_config['ontology'] = join(dir_repo, config['file'])
+        ontology_config['ontology'] = join(dir_repo, config['ontology'])
 
         ontology_config['template'] = None
         if 'template' in config:
             ontology_config['template'] = join(dir_repo, config['template'])
 
-        ontology_config['web_ontology'] = join(current_webdir, ontology_name)
+        ontology_config['web_directory'] = join(dir_web, config['directory'])
 
-        ontology_config['web_doc'] = join(current_webdir, doc_name)
+        ontology_config['export_formats'] = ['owl']
+        if 'export' in config:
+            ontology_config['export_formats'] = config['export']
 
         return ontology_config
 
