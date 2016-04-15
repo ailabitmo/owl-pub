@@ -1,6 +1,8 @@
 FROM ubuntu
 MAINTAINER oleg_kuzmin
 
+ENV REFRESHED_AT 2016–04–15
+
 RUN echo "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) main universe" >> /etc/apt/sources.list
 RUN apt-get update
 RUN apt-get install -y nginx python python-dev python-setuptools git
