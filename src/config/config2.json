@@ -38,6 +38,23 @@
           "directory": "GoodRelations"
         }
       ]
+    },
+    {
+      "clone_url": "https://github.com/semiotproject/ontologies.git",
+      "ontologies": [
+        {
+          "ontology": "emtr/electricmeters.owl",
+          "directory": "emtr"
+        },
+        {
+          "ontology": "hmtr/heatmeters.owl",
+          "directory": "hmtr"
+        },
+        {
+          "ontology": "ssncom/ssncom.owl",
+          "directory": "ssncom"
+        }
+      ]
     }
   ]
 }
