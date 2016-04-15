@@ -1,62 +1,62 @@
-from flask import Flask, request, abort
-from OwlPub import OwlPub, RepositoryNotFoundError
 import hmac
-from hashlib import sha1
 import json
+from hashlib import sha1
 
+from flask import Flask, request, abort
+
+from OwlPub import OwlPub, RepositoryNotFoundError
 
 publisher = OwlPub()
 Webhook = Flask(__name__)
 
 
-def checkSecret(config):
-    pass
+def _check_secret(config):
+    signature = request.headers.get('X-Hub-Signature')
+    if 'secret' in config and signature:
+        secret = config['secret']
+        signature = signature.split('=')[1]
+        if type(secret) == unicode:
+            secret = secret.encode()
+        mac = hmac.new(secret, msg=request.data, digestmod=sha1)
+        if not hmac.compare_digest(mac.hexdigest(), signature):
+            abort(403)
 
 
-@Webhook.route("/webhook", methods=["POST"])
-def handlerByCloneUrl():
-    publisher.loadConfig()
+@Webhook.route('/webhook', methods=['POST'])
+def handler_by_clone_url():
+    publisher.load_config()
+
     try:
         payload = json.loads(request.payload)
-        clone_url = payload['repository']['clone_url']
-        repo = publisher.getRepoByCloneUrl(clone_url)
+        full_name = payload['repository']['full_name']
+        repo = publisher.get_repo_by_name(full_name)
     except RepositoryNotFoundError, e:
         raise e
 
-    if 'secret' in repo.config:
-        secret = repo.config['secret']
-        signature = request.headers.get('X-Hub-Signature').split('=')[1]
-        if type(secret) == unicode:
-            secret = secret.encode()
-        mac = hmac.new(secret, msg=request.data, digestmod=sha1)
-        if not hmac.compare_digest(mac.hexdigest(), signature):
-            abort(403)
+    _check_secret(repo.config)
 
     repo.sync()
     repo.regenerate()
-    return "OK"
+
+    return 'OK'
 
 
-@Webhook.route("/webhook/<webhook_id>", methods=["POST", "GET"])
-def handlerByWebhookId(webhook_id):
-    publisher.loadConfig()
+@Webhook.route('/webhook/<webhook_id>', methods=['POST', 'GET'])
+def handler_by_webhook_id(webhook_id):
+    publisher.load_config()
+
     try:
-        repo = publisher.getRepoByWebhookId(int(webhook_id))
+        repo = publisher.get_repo_by_webhook_id(int(webhook_id))
     except RepositoryNotFoundError as e:
         return str(e)
 
-    if 'secret' in repo.config:
-        secret = repo.config['secret']
-        signature = request.headers.get('X-Hub-Signature').split('=')[1]
-        if type(secret) == unicode:
-            secret = secret.encode()
-        mac = hmac.new(secret, msg=request.data, digestmod=sha1)
-        if not hmac.compare_digest(mac.hexdigest(), signature):
-            abort(403)
+    _check_secret(repo.config)
 
     repo.sync()
     repo.regenerate()
-    return "OK"
 
-if __name__ == "__main__":
+    return 'OK'
+
+
+if __name__ == '__main__':
     Webhook.run(port=8000, debug=True)

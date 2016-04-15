@@ -1,4 +1,5 @@
-rdflib
 flask
-jinja2
 gitpython
+jinja2
+rdflib
+rdflib-jsonld

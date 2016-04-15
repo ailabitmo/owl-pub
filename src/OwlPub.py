@@ -1,10 +1,10 @@
 import json
-from RepoHandler import RepoHandler
 from os.path import abspath, join, splitext, basename, realpath, dirname
+
+from RepoHandler import RepoHandler
 
 
 class ParseConfigError(Exception):
-    """docstring for ParseConfigError"""
     def __init__(self, arg):
         super(ParseConfigError, self).__init__()
         self.arg = arg
@@ -14,7 +14,6 @@ class ParseConfigError(Exception):
 
 
 class RepositoryNotFoundError(Exception):
-    """docstring for RepositoryNotFoundError"""
     def __init__(self, arg):
         super(RepositoryNotFoundError, self).__init__()
         self.arg = arg
@@ -24,84 +23,76 @@ class RepositoryNotFoundError(Exception):
 
 
 class OwlPub:
-
     repos = []
 
     def __init__(self):
-        self.loadConfig()
+        self.load_config()
 
-    def loadConfig(self):
+    def load_config(self):
+        config_path = join(dirname(realpath(__file__)), 'config',
+                           'config.json')
+
+        with open(config_path) as config_file:
+            config = json.load(config_file)
+
+        dir_repos = abspath(config['directories']['repos'])
+        dir_web = abspath(config['directories']['web'])
+
+        for repo in config['repos']:
+            repo_config = self.parse_repo_config(repo, dir_repos, dir_web)
+            self.repos.append(repo_config)
+
         try:
-            config_path = join(dirname(realpath(__file__)), 'config', 'config.json')
-            with open(config_path) as config_file:
-                config = json.load(config_file)
-            dir_repos = abspath(config['directories']['repos'])
-            dir_web = abspath(config['directories']['web'])
-            for i in config['repos']:
-                repo_config = self.parseRepoConfig(i, dir_repos, dir_web)
-                self.repos.append(repo_config)
+            pass
         except:
-            raise ParseConfigError(u"config file invalid")
+            raise ParseConfigError(u'config file invalid')
 
-    def parseRepoConfig(self, config, dir_repos, dir_web):
+    def parse_repo_config(self, config, dir_repos, dir_web):
         repo_name = splitext(basename(config['clone_url']))[0]
         dir_repo = join(dir_repos, repo_name)
 
-        repo_config = {}
-
-        repo_config['directory'] = dir_repo
-
-        repo_config['clone_url'] = config['clone_url']
-
-        repo_config['webhook_id'] = None
-        if 'webhook_id' in config:
-            repo_config['webhook_id'] = config['webhook_id']
-
-        if 'secret' in config:
-            repo_config['secret'] = config['secret']
-
-        repo_config['ontologies'] = []
-        for i in config['ontologies']:
-            ontology_config = self.parseOntologyConfig(i, dir_repo, dir_web)
-            repo_config['ontologies'].append(ontology_config)
+        repo_config = {
+            'directory': dir_repo, 'clone_url': config['clone_url'],
+            'webhook_id': config['webhook_id']
+            if 'webhook_id' in config else None,
+            'secret': config['secret'] if 'secret' in config else None,
+            'ontologies': [self.parse_ontology_config(ontology,
+                                                      dir_repo,
+                                                      dir_web)
+                           for ontology in config['ontologies']]
+        }
 
         return repo_config
 
-    def parseOntologyConfig(self, config, dir_repo, dir_web):
+    @staticmethod
+    def parse_ontology_config(config, dir_repo, dir_web):
+        return {
+            'ontology': join(dir_repo, config['ontology']),
+            'template': join(dir_repo, config['template'])
+            if 'template' in config else None,
+            'web_directory': join(dir_web, config['directory'])
+        }
 
-        ontology_config = {}
-
-        ontology_config['ontology'] = join(dir_repo, config['ontology'])
-
-        ontology_config['template'] = None
-        if 'template' in config:
-            ontology_config['template'] = join(dir_repo, config['template'])
-
-        ontology_config['web_directory'] = join(dir_web, config['directory'])
-
-        ontology_config['export_formats'] = ['owl']
-        if 'export' in config:
-            ontology_config['export_formats'] = config['export']
-
-        return ontology_config
-
-    def getRepoByWebhookId(self, webhook_id):
+    def get_repo_by_webhook_id(self, webhook_id):
         for repo_config in self.repos:
             if repo_config['webhook_id'] == webhook_id:
                 return RepoHandler(repo_config)
-        raise RepositoryNotFoundError(u"repository with webhook_id " + str(webhook_id) + u" not found!")
+        raise RepositoryNotFoundError(
+            u'repository with webhook_id ' + str(webhook_id) + u' not found!')
 
-    def getRepoByCloneUrl(self, clone_url):
+    def get_repo_by_name(self, name):
         for repo_config in self.repos:
-            if repo_config['clone_url'] == clone_url:
+            if name + '.git' in repo_config['clone_url']:
                 return RepoHandler(repo_config)
-        raise RepositoryNotFoundError(u"repository with clone_url " + str(clone_url) + u" not found!")
+        raise RepositoryNotFoundError(
+            u'repository with name ' + str(name) + u' not found!')
 
     def rise(self):
         for repo_config in self.repos:
             repo = RepoHandler(repo_config)
             repo.regenerate()
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     publisher = OwlPub()
     publisher.rise()

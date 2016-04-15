@@ -1,12 +1,15 @@
-from os.path import realpath, join, dirname, exists, basename, splitext
 from os import makedirs
+from os.path import realpath, join, dirname, exists, splitext, basename
 from shutil import rmtree
+from xml.sax._exceptions import SAXParseException
+
 from git import Repo
+from rdflib.exceptions import ParserError
+
 from DocGenerator import DocGenerator
 
 
 class RepoHandler:
-
     repo = None
     config = None
 
@@ -15,11 +18,12 @@ class RepoHandler:
             repo = Repo(config['directory'])
         except:
             repo = Repo.clone_from(config['clone_url'], config['directory'])
+
         self.repo = repo
         self.config = config
-        self.__checkBranches()
+        self.__check_branches()
 
-    def __checkBranches(self):
+    def __check_branches(self):
         branches = self.repo.branches
         branches.append('HEAD')
         branches.append('master')
@@ -29,34 +33,69 @@ class RepoHandler:
                 self.repo.create_head(name, i)
 
     def sync(self):
-        self.__checkBranches()
+        self.__check_branches()
         self.repo.remotes['origin'].pull()
 
+    @staticmethod
+    def generate_ontology(_from, _to, branches_info, template):
+        if not exists(branches_info['branch_dir']):
+            makedirs(branches_info['branch_dir'])
+
+        try:
+            print(u'Parsing {0:s}...'.format(_from))
+
+            generator = DocGenerator(_from)
+
+            for export_format in ("owl", "ttl", "jsonld"):
+                generator.export(join(branches_info['branch_dir'],
+                                      _to + '.' + export_format),
+                                 export_format)
+            generator.generate(join(branches_info['branch_dir'], _to + '.html'),
+                               branches_info,
+                               template)
+        except (SAXParseException, ParserError):
+            print(u'WARNING: Failed parsing {0:s}...'.format(_from))
+
     def regenerate(self):
-        for conf_onto in self.config['ontologies']:
-
-            if conf_onto['template'] is None or not exists(conf_onto['template']):
-                template_path = join(dirname(realpath(__file__)), "template.html")
+        # First, delete the previously generated files in webroot
+        for ontology in self.config['ontologies']:
+            if not exists(ontology['web_directory']):
+                makedirs(ontology['web_directory'])
             else:
-                template_path = conf_onto['template']
+                rmtree(ontology['web_directory'])
 
-            base_name = splitext(basename(conf_onto['ontology']))[0]
+        # Now generate new files
+        for ontology in self.config['ontologies']:
+            # contributors =
 
-            if not exists(conf_onto['web_directory']):
-                makedirs(conf_onto['web_directory'])
+            if ontology['template'] is None or not exists(ontology['template']):
+                template = join(dirname(realpath(__file__)), 'templates',
+                                'default.html')
             else:
-                rmtree(conf_onto['web_directory'])
+                template = ontology['template']
 
-            for branch in self.repo.branches:
-                branch.checkout()
-                branch_directory = join(conf_onto['web_directory'], branch.name)
-                if not exists(branch_directory):
-                    makedirs(branch_directory)
+            all_branches = []
+            # Generate branches & tags list for ontology
+            for branch in (self.repo.branches + self.repo.tags):
+                self.repo.git.execute(['git', 'checkout', branch.name])
+                if exists(ontology['ontology']):
+                    all_branches.append(branch.name)
 
-                if exists(conf_onto['ontology']):
-                    generator = DocGenerator(conf_onto['ontology'])
+            for branch in (self.repo.branches + self.repo.tags):
+                self.repo.git.execute(['git', 'checkout', branch.name])
+                if exists(ontology['ontology']):
+                    branches_info = {
+                        'current_branch': branch.name,
+                        'branch_dir': join(
+                            ontology['web_directory'],
+                            branch.name),
+                        'other_branches': [b for b in all_branches
+                                           if b not in branch.name],
+                        'file_name': splitext(basename(ontology['ontology']))[0]
+                    }
+                    self.generate_ontology(ontology['ontology'],
+                                           branches_info['file_name'],
+                                           branches_info,
+                                           template)
 
-                    for export_format in conf_onto['export_formats']:
-                        generator.export(join(branch_directory, base_name + '.' + export_format), export_format)
-
-                    generator.generate(join(branch_directory, base_name + '.html'), template_path)
+            self.repo.git.execute(['git', 'checkout', 'master'])
