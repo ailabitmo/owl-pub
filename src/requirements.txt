@@ -4,3 +4,4 @@ jinja2
 rfc3987
 rdflib
 rdflib-jsonld
+requests
