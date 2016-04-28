@@ -21,4 +21,10 @@ jQuery(document).ready(function ($) {
             jQuery(this).css('color', 'red');
         }
     });
+
+    /* Commits info button */
+    jQuery('#commits_info__btn').click(function (event) {
+        event.preventDefault();
+        jQuery('#commits_info__inner').toggle('300');
+    });
 });

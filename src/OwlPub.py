@@ -52,7 +52,8 @@ class OwlPub:
         dir_repo = join(dir_repos, repo_name)
 
         repo_config = {
-            'directory': dir_repo, 'clone_url': config['clone_url'],
+            'directory': dir_repo,
+            'clone_url': config['clone_url'],
             'webhook_id': config['webhook_id']
             if 'webhook_id' in config else None,
             'secret': config['secret'] if 'secret' in config else None,

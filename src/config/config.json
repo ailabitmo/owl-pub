@@ -13,27 +13,6 @@
           "directory": "foodontology"
         }
       ]
-    },
-    {
-      "clone_url": "https://github.com/VisualDataWeb/OWL2VOWL.git",
-      "webhook_id": 2,
-      "ontologies": [
-        {
-          "ontology": "ontologies/marinetlo.owl",
-          "directory": "owl2vowl"
-        }
-      ]
-    },
-    {
-      "clone_url": "https://github.com/Logunov/OWL-Ontologies.git",
-      "secret": "OyEZJG6gDxHFF4KTbWNq6vbc47dOxZaVURwCWfp3x71lFsdULg",
-      "webhook_id": 3,
-      "ontologies": [
-        {
-          "ontology": "GoodRelations/GoodRelations.owl",
-          "directory": "GoodRelations"
-        }
-      ]
     }
   ]
 }

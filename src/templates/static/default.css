@@ -202,6 +202,7 @@ a.deprecated {
 
     border-bottom: 1px dashed #000;
 }
+
 .content__inner--meta > div,
 .content__inner:last-child,
 .content__inner > div:last-child {
@@ -216,7 +217,6 @@ a.deprecated {
 .content__inner > div > div {
     margin-bottom: 1em;
 }
-
 .content__inner ul {
     margin: .5em 0 1em;
 }
@@ -290,4 +290,41 @@ a.deprecated {
 
     border-radius: 100%;
     background-color: #000;
+}
+
+/* Commits info */
+.commits_info .commits_info__btn {
+    margin-bottom: .5em;
+}
+.commits_info ul {
+    display: none;
+
+    margin: 0;
+    padding: 0;
+
+    list-style: none;
+}
+.commits_info ul li {
+    padding: 10px 0;
+
+    border-bottom: 1px dashed;
+}
+.commits_info ul li:last-child {
+    border-bottom: none;
+}
+.commits_info ul li:nth-child(even) {
+    background-color: #e8e8e8;
+}
+.commits_info .message {
+    float: left;
+
+    width: 77%;
+}
+.commits_info .meta {
+    float: right;
+
+    width: 20%;
+}
+.commits_info .meta a {
+    display: block;
 }

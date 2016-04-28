@@ -3,6 +3,7 @@ from os.path import realpath, join, dirname, exists, splitext, basename
 from shutil import rmtree
 from xml.sax._exceptions import SAXParseException
 
+import requests
 from git import Repo
 from rdflib.exceptions import ParserError
 
@@ -56,6 +57,24 @@ class RepoHandler:
         except (SAXParseException, ParserError):
             print(u'WARNING: Failed parsing {0:s}...'.format(_from))
 
+    def __get_commits(self, ontology):
+        # TODO: Make moar pretty
+        if 'https://github.com/' in self.config['clone_url']:
+            r = requests.get('https://api.github.com/repos/' +
+                             # self.config['clone_url'][19:].split('.')[0]
+                             # or
+                             # self.config['clone_url'][19:-4]
+                             # ?
+                             self.config['clone_url'][19:].split('.')[0] +
+                             '/commits?path=' +
+                             ontology[len(self.config['directory']):])
+            if r.status_code == 200:
+                return r.json()
+        else:
+            # TODO: Get commits from git module directly
+            pass
+        return None
+
     def regenerate(self):
         # First, delete the previously generated files in webroot
         for ontology in self.config['ontologies']:
@@ -81,21 +100,31 @@ class RepoHandler:
                 if exists(ontology['ontology']):
                     all_branches.append(branch.name)
 
+            branches_info = {
+                'commits': self.__get_commits(
+                    ontology['ontology']
+                )
+            }
+
             for branch in (self.repo.branches + self.repo.tags):
                 self.repo.git.execute(['git', 'checkout', branch.name])
                 if exists(ontology['ontology']):
-                    branches_info = {
-                        'current_branch': branch.name,
-                        'branch_dir': join(
-                            ontology['web_directory'],
-                            branch.name),
-                        'other_branches': [b for b in all_branches
-                                           if b not in branch.name],
-                        'file_name': splitext(basename(ontology['ontology']))[0]
-                    }
-                    self.generate_ontology(ontology['ontology'],
-                                           branches_info['file_name'],
-                                           branches_info,
-                                           template)
+                    branches_info['current_branch'] = branch.name
+                    branches_info['other_branches'] = [b for b in all_branches
+                                                       if b not in branch.name]
+                    branches_info['branch_dir'] = join(
+                        ontology['web_directory'],
+                        branch.name
+                    )
+                    branches_info['file_name'] = splitext(
+                        basename(ontology['ontology'])
+                    )[0]
+
+                    self.generate_ontology(
+                        ontology['ontology'],
+                        branches_info['file_name'],
+                        branches_info,
+                        template
+                    )
 
             self.repo.git.execute(['git', 'checkout', 'master'])
