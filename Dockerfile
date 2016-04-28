@@ -1,7 +1,7 @@
 FROM ubuntu
 MAINTAINER oleg_kuzmin
 
-ENV REFRESHED_AT 2016–04–15
+ENV REFRESHED_AT 2016–04–27
 
 RUN echo "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) main universe" >> /etc/apt/sources.list
 RUN apt-get update
@@ -15,7 +15,7 @@ ADD /nginx/uwsgi_params /etc/nginx/uwsgi_params
 
 RUN pip install -r /home/owl-pub/src/requirements.txt
 
-EXPOSE 80 443
+EXPOSE 80
 
 WORKDIR /home/owl-pub/src
 

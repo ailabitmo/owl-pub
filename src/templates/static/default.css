@@ -13,6 +13,16 @@ body {
     box-sizing: border-box;
 }
 
+.clearfix {
+    margin-bottom: 0 !important;
+}
+.clearfix:after {
+    display: table;
+    clear: both;
+
+    content: '';
+}
+
 .site-width {
     max-width: 1100px;
     margin: 0 auto;
@@ -217,8 +227,42 @@ a.deprecated {
 }
 
 /* Deprecated */
-div.deprecated {
+.deprecated {
     color: #888;
+}
+
+/* Name */
+.label {
+    float: left;
+}
+
+/* IRI */
+.iri {
+    float: right;
+}
+
+/* Links */
+.content__inner > div > div > strong > a {
+    color: #000;
+}
+
+/* Lists */
+.content__inner > div > div > ul {
+    display: inline;
+
+    margin: 0;
+    padding: 0;
+}
+.content__inner > div > div > ul li {
+    display: inline;
+}
+.content__inner > div > div > ul li:after {
+    display: inline;
+
+    content: ', ';
+}
+.content__inner > div > div > ul li:last-child:after {
+    content: '';
 }
 
 /* Block navigation */

@@ -27,6 +27,7 @@ class DocGenerator:
     original_path = None
     original_format = None
     base_namespace = ''
+    prefix = ''
 
     def __init__(self, ontology_path):
         self.graph = Graph()
@@ -53,11 +54,18 @@ class DocGenerator:
             pass
         return None
 
+    @staticmethod
+    def __hashed(value):
+        return value if '/' in value else '#' + value
+
+    def __prefixed(self, value):
+        return value if '/' in value else self.prefix + value
+
     def __local_anchor_from_iri(self, full_iri):
         out = None
         if full_iri is not None and self.ontology_iri in full_iri:
             out = self.__anchor_from_iri(full_iri)
-        return full_iri if out is None else '#' + out
+        return full_iri if out is None else out
 
     def __extract_text(self, subject=None, predicate=None, obj=None,
                        language=u'en'):
@@ -433,6 +441,8 @@ SELECT ?i WHERE {?i rdf:type ?c . ?c rdf:type <http://www.w3.org/2002/07/owl#Cla
         for k, v in self.graph.namespaces():
             if k == '':
                 k = 'default'
+            if self.ontology_iri in v and k != 'default':
+                self.prefix = k + ':'
             data['namespaces'].append((k, v))
 
         # return
@@ -446,6 +456,8 @@ SELECT ?i WHERE {?i rdf:type ?c . ?c rdf:type <http://www.w3.org/2002/07/owl#Cla
         env = Environment(trim_blocks=True, lstrip_blocks=True)
         env.filters['md5filter'] = self.__md5_filter
         env.filters['anchorFromIRI'] = self.__anchor_from_iri
+        env.filters['prefixed'] = self.__prefixed
+        env.filters['hashed'] = self.__hashed
         template = env.from_string(template_file.read())
         return template.render(data)
 

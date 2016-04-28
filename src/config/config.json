@@ -21,10 +21,6 @@
         {
           "ontology": "ontologies/marinetlo.owl",
           "directory": "owl2vowl"
-        },
-        {
-          "ontology": "ontologies/testing.owl",
-          "directory": "owl2vowl"
         }
       ]
     },

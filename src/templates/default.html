@@ -21,7 +21,7 @@
 </head>
 <body>
 <header id="header" class="header">
-    {% if ontology_title is defined %}
+    {% if ontology_title %}
         <h2>{{ ontology_title }}</h2>
     {% endif %}
 </header>
@@ -108,20 +108,19 @@
             {% endif %}
             <div>
                 <strong>Current branch:</strong>
-                {{ branches_info['current_branch'] }}
-            </div>
-            {% if branches_info['other_branches'] %}
-                <strong>Available branches:</strong>
-                <ol>
-                    {% for branch in branches_info['other_branches'] %}
-                        <li>
-                            <a href="../{{ branch }}/{{ branches_info['file_name'] }}.html">
+                {{ branches_info['current_branch'] }}.
+                {% if branches_info['other_branches'] %}
+                    Switch to:
+                    <select id="branch_switcher">
+                        <option></option>
+                        {% for branch in branches_info['other_branches'] %}
+                            <option value="../{{ branch }}/{{ branches_info['file_name'] }}.html">
                                 {{ branch }}
-                            </a>
-                        </li>
-                    {% endfor %}
-                </ol>
-            {% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                {% endif %}
+            </div>
         </div>
 
         {% if abstract %}
@@ -164,11 +163,12 @@
                 {% for class in classes %}
                     <div id="{{ class.iri|anchorFromIRI }}"
                          class="{% if class.is_deprecated %}deprecated{% endif %}">
-                        <h4>{{ class.label }}</h4>
-                        <div>
+                        <h4 class="label">{{ class.label }}</h4>
+                        <div class="iri">
                             <strong>IRI:</strong>
-                            <a href="{{ class.iri }}">{{ class.iri }}</a>
+                            <a href="{{ class.iri }}">{{ class.iri|anchorFromIRI|prefixed }}</a>
                         </div>
+                        <div class="clearfix"></div>
                         {% if class.comment %}
                             <div>{{ class.comment }}</div>
                         {% endif %}
@@ -177,7 +177,7 @@
                                 <strong>Superclasses:</strong>
                                 <ul>
                                     {% for i in class.super_classes %}
-                                        <li><a href="{{ i }}">{{ i }}</a></li>
+                                        <li><a href="{{ i|hashed }}">{{ i|prefixed }}</a></li>
                                     {% endfor %}
                                 </ul>
                             </div>
@@ -187,7 +187,7 @@
                                 <strong>Subclasses:</strong>
                                 <ul>
                                     {% for i in class.sub_classes %}
-                                        <li><a href="{{ i }}">{{ i }}</a></li>
+                                        <li><a href="{{ i|hashed }}">{{ i|prefixed }}</a></li>
                                     {% endfor %}
                                 </ul>
                             </div>
@@ -199,7 +199,7 @@
                                     :</strong>
                                 <ul>
                                     {% for i in class.domain_for %}
-                                        <li><a href="{{ i }}">{{ i }}</a></li>
+                                        <li><a href="{{ i|hashed }}">{{ i|prefixed }}</a></li>
                                     {% endfor %}
                                 </ul>
                             </div>
@@ -211,7 +211,7 @@
                                     for:</strong>
                                 <ul>
                                     {% for i in class.in_range %}
-                                        <li><a href="{{ i }}">{{ i }}</a></li>
+                                        <li><a href="{{ i|hashed }}">{{ i|prefixed }}</a></li>
                                     {% endfor %}
                                 </ul>
                             </div>
@@ -246,11 +246,12 @@
                 {% for property in data_properties %}
                     <div id="{{ property.iri|anchorFromIRI }}"
                          class="{% if property.is_deprecated %}deprecated{% endif %}">
-                        <h4>{{ property.iri if property.label is none else property.label }}</h4>
-                        <div>
+                        <h4 class="label">{{ property.label }}</h4>
+                        <div class="iri">
                             <strong>IRI:</strong>
-                            <a href="{{ property.iri }}">{{ property.iri }}</a>
+                            <a href="{{ property.iri }}">{{ property.iri|anchorFromIRI }}</a>
                         </div>
+                        <div class="clearfix"></div>
                         {% if property.comment %}
                             <div>{{ property.comment }}</div>
                         {% endif %}
@@ -261,7 +262,7 @@
                                 </strong>
                                 <ul>
                                     {% for i in property.super_properties %}
-                                        <li><a href="{{ i }}">{{ i }}</a></li>
+                                        <li><a href="{{ i|hashed }}">{{ i|prefixed }}</a></li>
                                     {% endfor %}
                                 </ul>
                             </div>
@@ -271,7 +272,7 @@
                                 <strong>Sub-properties:</strong>
                                 <ul>
                                     {% for i in property.sub_properties %}
-                                        <li><a href="{{ i }}">{{ i }}</a></li>
+                                        <li><a href="{{ i|hashed }}">{{ i|prefixed }}</a></li>
                                     {% endfor %}
                                 </ul>
                             </div>
@@ -282,7 +283,7 @@
                                         href="http://www.w3.org/2000/01/rdf-schema#range">rdfs:range</a>):</strong>
                                 <ul>
                                     {% for i in property.domain_for %}
-                                        <li><a href="{{ i }}">{{ i }}</a></li>
+                                        <li><a href="{{ i|hashed }}">{{ i|prefixed }}</a></li>
                                     {% endfor %}
                                 </ul>
                             </div>
@@ -293,7 +294,7 @@
                                         href="http://www.w3.org/2000/01/rdf-schema#domain">rdfs:domain</a>):</strong>
                                 <ul>
                                     {% for i in property.has_domain %}
-                                        <li><a href="{{ i }}">{{ i }}</a></li>
+                                        <li><a href="{{ i|hashed }}">{{ i|prefixed }}</a></li>
                                     {% endfor %}
                                 </ul>
                             </div>
@@ -303,7 +304,7 @@
                                 <strong>In range of:</strong>
                                 <ul>
                                     {% for i in property.in_range %}
-                                        <li><a href="{{ i }}">{{ i }}</a></li>
+                                        <li><a href="{{ i|hashed }}">{{ i|prefixed }}</a></li>
                                     {% endfor %}
                                 </ul>
                             </div>
@@ -314,7 +315,7 @@
                                         href="http://www.w3.org/2000/01/rdf-schema#range">rdfs:range</a>):</strong>
                                 <ul>
                                     {% for i in property.has_range %}
-                                        <li><a href="{{ i }}">{{ i }}</a></li>
+                                        <li><a href="{{ i|hashed }}">{{ i|prefixed }}</a></li>
                                     {% endfor %}
                                 </ul>
                             </div>
@@ -349,11 +350,12 @@
                 {% for property in object_properties %}
                     <div id="{{ property.iri|anchorFromIRI }}"
                          class="{% if property.is_deprecated %}deprecated{% endif %}">
-                        <h4>{{ property.iri if property.label is none else property.label }}</h4>
-                        <div>
+                        <h4 class="label">{{ property.label }}</h4>
+                        <div class="iri">
                             <strong>IRI:</strong>
-                            <a href="{{ property.iri }}">{{ property.iri }}</a>
+                            <a href="{{ property.iri }}">{{ property.iri|anchorFromIRI }}</a>
                         </div>
+                        <div class="clearfix"></div>
                         {% if property.comment %}
                             <div>{{ property.comment }}</div>
                         {% endif %}
@@ -365,7 +367,7 @@
                                 </strong>
                                 <ul>
                                     {% for i in property.super_properties %}
-                                        <li><a href="{{ i }}">{{ i }}</a></li>
+                                        <li><a href="{{ i|hashed }}">{{ i|prefixed }}</a></li>
                                     {% endfor %}
                                 </ul>
                             </div>
@@ -375,7 +377,7 @@
                                 <strong>Sub-properties:</strong>
                                 <ul>
                                     {% for i in property.sub_properties %}
-                                        <li><a href="{{ i }}">{{ i }}</a></li>
+                                        <li><a href="{{ i|hashed }}">{{ i|prefixed }}</a></li>
                                     {% endfor %}
                                 </ul>
                             </div>
@@ -385,7 +387,7 @@
                                 <h5>is in domain of</h5>
                                 <p>
                                     {% for i in property.domain_for %}
-                                        <a href="{{ i }}">{{ i }}</a>
+                                        <a href="{{ i|hashed }}">{{ i|prefixed }}</a>
                                     {% endfor %}
                                 </p>
                             </div>
@@ -396,7 +398,7 @@
                                         href="http://www.w3.org/2000/01/rdf-schema#domain">rdfs:domain</a>):</strong>
                                 <ul>
                                     {% for i in property.has_domain %}
-                                        <li><a href="{{ i }}">{{ i }}</a></li>
+                                        <li><a href="{{ i|hashed }}">{{ i|prefixed }}</a></li>
                                     {% endfor %}
                                 </ul>
                             </div>
@@ -406,7 +408,7 @@
                                 <h5>is in range of</h5>
                                 <p>
                                     {% for i in property.in_range %}
-                                        <a href="{{ i }}">{{ i }}</a>
+                                        <a href="{{ i|hashed }}">{{ i|prefixed }}</a>
                                     {% endfor %}
                                 </p>
                             </div>
@@ -417,7 +419,7 @@
                                         href="http://www.w3.org/2000/01/rdf-schema#range">rdfs:range</a>):</strong>
                                 <ul>
                                     {% for i in property.has_range %}
-                                        <li><a href="{{ i }}">{{ i }}</a></li>
+                                        <li><a href="{{ i|hashed }}">{{ i|prefixed }}</a></li>
                                     {% endfor %}
                                 </ul>
                             </div>
@@ -452,11 +454,12 @@
                 {% for property in annotation_properties %}
                     <div id="{{ property.iri|anchorFromIRI }}"
                          class="{% if property.is_deprecated %}deprecated{% endif %}">
-                        <h4>{{ property.iri if property.label is none else property.label }}</h4>
-                        <div>
+                        <h4 class="label">{{ property.label }}</h4>
+                        <div class="iri">
                             <strong>IRI:</strong>
-                            <a href="{{ property.iri }}">{{ property.iri }}</a>
+                            <a href="{{ property.iri }}">{{ property.iri|anchorFromIRI }}</a>
                         </div>
+                        <div class="clearfix"></div>
                         {% if property.comment %}
                             <div>{{ property.comment }}</div>
                         {% endif %}
@@ -465,7 +468,7 @@
                                 <h5>has super-properties</h5>
                                 <p>
                                     {% for i in property.super_properties %}
-                                        <a href="{{ i }}">{{ i }}</a>
+                                        <a href="{{ i|hashed }}">{{ i|prefixed }}</a>
                                     {% endfor %}
                                 </p>
                             </div>
@@ -475,7 +478,7 @@
                                 <h5>has sub-properties</h5>
                                 <p>
                                     {% for i in property.sub_properties %}
-                                        <a href="{{ i }}">{{ i }}</a>
+                                        <a href="{{ i|hashed }}">{{ i|prefixed }}</a>
                                     {% endfor %}
                                 </p>
                             </div>
@@ -485,7 +488,7 @@
                                 <h5>is in domain of</h5>
                                 <p>
                                     {% for i in property.domain_for %}
-                                        <a href="{{ i }}">{{ i }}</a>
+                                        <a href="{{ i|hashed }}">{{ i|prefixed }}</a>
                                     {% endfor %}
                                 </p>
                             </div>
@@ -495,7 +498,7 @@
                                 <h5>has domain</h5>
                                 <p>
                                     {% for i in property.has_domain %}
-                                        <a href="{{ i }}">{{ i }}</a>
+                                        <a href="{{ i|hashed }}">{{ i|prefixed }}</a>
                                     {% endfor %}
                                 </p>
                             </div>
@@ -505,7 +508,7 @@
                                 <h5>is in range of</h5>
                                 <p>
                                     {% for i in property.in_range %}
-                                        <a href="{{ i }}">{{ i }}</a>
+                                        <a href="{{ i|hashed }}">{{ i|prefixed }}</a>
                                     {% endfor %}
                                 </p>
                             </div>
@@ -515,7 +518,7 @@
                                 <h5>has range</h5>
                                 <p>
                                     {% for i in property.has_range %}
-                                        <a href="{{ i }}">{{ i }}</a>
+                                        <a href="{{ i|hashed }}">{{ i|prefixed }}</a>
                                     {% endfor %}
                                 </p>
                             </div>
@@ -551,11 +554,12 @@
                 {% for individual in individuals %}
                     <div id="{{ individual.iri|anchorFromIRI }}"
                          class="{% if individual.is_deprecated %}deprecated{% endif %}">
-                        <h4>{{ individual.iri if individual.label is none else individual.label }}</h4>
-                        <div>
+                        <h4 class="label">{{ individual.label }}</h4>
+                        <div class="iri">
                             <strong>IRI:</strong>
-                            <a href="{{ individual.iri }}">{{ individual.iri }}</a>
+                            <a href="{{ individual.iri }}">{{ individual.iri|anchorFromIRI }}</a>
                         </div>
+                        <div class="clearfix"></div>
                         {% if individual.comment %}
                             <div>{{ individual.comment }}</div>
                         {% endif %}
@@ -564,7 +568,7 @@
                                 <h5>has super-properties</h5>
                                 <p>
                                     {% for i in individual.super_properties %}
-                                        <a href="{{ i }}">{{ i }}</a>
+                                        <a href="{{ i|hashed }}">{{ i|prefixed }}</a>
                                     {% endfor %}
                                 </p>
                             </div>
@@ -574,7 +578,7 @@
                                 <h5>has sub-properties</h5>
                                 <p>
                                     {% for i in individual.sub_properties %}
-                                        <a href="{{ i }}">{{ i }}</a>
+                                        <a href="{{ i|hashed }}">{{ i|prefixed }}</a>
                                     {% endfor %}
                                 </p>
                             </div>
@@ -584,7 +588,7 @@
                                 <h5>is in domain of</h5>
                                 <p>
                                     {% for i in individual.domain_for %}
-                                        <a href="{{ i }}">{{ i }}</a>
+                                        <a href="{{ i|hashed }}">{{ i|prefixed }}</a>
                                     {% endfor %}
                                 </p>
                             </div>
@@ -594,7 +598,7 @@
                                 <h5>has domain</h5>
                                 <p>
                                     {% for i in individual.has_domain %}
-                                        <a href="{{ i }}">{{ i }}</a>
+                                        <a href="{{ i|hashed }}">{{ i|prefixed }}</a>
                                     {% endfor %}
                                 </p>
                             </div>
@@ -604,7 +608,7 @@
                                 <h5>is in range of</h5>
                                 <p>
                                     {% for i in individual.in_range %}
-                                        <a href="{{ i }}">{{ i }}</a>
+                                        <a href="{{ i|hashed }}">{{ i|prefixed }}</a>
                                     {% endfor %}
                                 </p>
                             </div>
@@ -614,7 +618,7 @@
                                 <h5>has range</h5>
                                 <p>
                                     {% for i in individual.has_range %}
-                                        <a href="{{ i }}">{{ i }}</a>
+                                        <a href="{{ i|hashed }}">{{ i|prefixed }}</a>
                                     {% endfor %}
                                 </p>
                             </div>
