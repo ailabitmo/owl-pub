@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Owl-pub ontologies index</title>
+    <link href="/_static/default.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu:400,700"
+          rel="stylesheet" type="text/css">
+
+    <link href="/home/ilya/dev/owl-pub/src/templates/static/default.css"
+          rel="stylesheet" type="text/css">
+</head>
+<body class="template--index">
+<header id="header" class="header">
+    <h2>Ontologies listing</h2>
+</header>
+<div class="content-wrap site-width">
+    {% for repo in repos_info %}
+        <h4>{{ repo['repo_name'] }}</h4>
+        <ol>
+            {% for ontology in repo['ontologies'] %}
+                <li>
+                    <a href="{{ ontology['path'] }}">{{ ontology['name'] }}</a>
+                </li>
+            {% endfor %}
+        </ol>
+    {% endfor %}
+</div>
+<footer id="footer" class="footer">owl-pub @ ITMO University 2016</footer>
+</body>
+</html>

@@ -19,7 +19,7 @@
     <script src="/home/ilya/dev/owl-pub/src/templates/static/jquery.sticky.js"></script>
     <script src="/home/ilya/dev/owl-pub/src/templates/static/default.js"></script>
 </head>
-<body>
+<body class="template--doc">
 <header id="header" class="header">
     {% if ontology_title %}
         <h2>{{ ontology_title }}</h2>
@@ -54,6 +54,9 @@
                 {% endif %}
                 {% if namespaces %}
                     <li><a href="#namespaces">Namespace declarations</a></li>
+                {% endif %}
+                {% if branches_info['commits'] %}
+                    <li><a href="#commits_info">Commits</a></li>
                 {% endif %}
             </ol>
         </div>
@@ -121,30 +124,6 @@
                     </select>
                 {% endif %}
             </div>
-            {% if branches_info['commits'] %}
-                <div class="commits_info">
-                    <button id="commits_info__btn" class="commits_info__btn">
-                        Show commits
-                    </button>
-                    <ul id="commits_info__inner" class="commits_info__inner">
-                        {% for commit in branches_info['commits'] %}
-                            <li class="clearfix">
-                                <div class="message">
-                                    {{ commit['commit']['message'] }}
-                                </div>
-                                <div class="meta">
-                                    <a href="{{ commit['committer']['html_url'] }}">
-                                        {{ commit['commit']['committer']['name'] }}
-                                    </a>
-                                    <a href="{{ commit['html_url'] }}">
-                                        {{ commit['commit']['committer']['date'] }}
-                                    </a>
-                                </div>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            {% endif %}
         </div>
 
         {% if abstract %}
@@ -698,6 +677,34 @@
                 {% endfor %}
             </ol>
         </div>
+
+        {% if branches_info['commits'] %}
+            <div id="commits_info" class="content__inner content__inner--commits_info">
+                <h4>{{ tof_item_num }}. Commits</h4>
+                {% set tof_item_num = tof_item_num + 1 %}
+
+                <button id="commits_info__btn" class="commits_info__btn">
+                    Show commits
+                </button>
+                <ul id="commits_info__inner" class="commits_info__inner">
+                    {% for commit in branches_info['commits'] %}
+                        <li class="clearfix">
+                            <div class="message">
+                                {{ commit['commit']['message'] }}
+                            </div>
+                            <div class="meta">
+                                <a href="{{ commit['committer']['html_url'] }}">
+                                    {{ commit['commit']['committer']['name'] }}
+                                </a>
+                                <a href="{{ commit['html_url'] }}">
+                                    {{ commit['commit']['committer']['date'] }}
+                                </a>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
     </div>
 </div>
 <footer id="footer" class="footer">owl-pub @ ITMO University 2016</footer>

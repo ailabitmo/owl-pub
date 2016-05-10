@@ -1,0 +1,29 @@
+{
+  "directories": {
+    "repos": "repos",
+    "web": "webroot"
+  },
+  "repos": [
+    {
+      "clone_url": "https://github.com/ailabitmo/food-ontology.git",
+      "webhook_id": 1,
+      "ontologies": [
+        {
+          "ontology": "food.owl",
+          "directory": "foodontology"
+        }
+      ]
+    },
+    {
+      "clone_url": "https://github.com/Logunov/OWL-Ontologies.git",
+      "secret": "OyEZJG6gDxHFF4KTbWNq6vbc47dOxZaVURwCWfp3x71lFsdULg",
+      "webhook_id": 2,
+      "ontologies": [
+        {
+          "ontology": "GoodRelations/GoodRelations.owl",
+          "directory": "GoodRelations"
+        }
+      ]
+    }
+  ]
+}

@@ -51,9 +51,10 @@ class RepoHandler:
                 generator.export(join(branches_info['branch_dir'],
                                       _to + '.' + export_format),
                                  export_format)
-            generator.generate(join(branches_info['branch_dir'], _to + '.html'),
-                               branches_info,
-                               template)
+            generator.generate_html_doc(
+                join(branches_info['branch_dir'], _to + '.html'),
+                branches_info,
+                template)
         except (SAXParseException, ParserError):
             print(u'WARNING: Failed parsing {0:s}...'.format(_from))
 
@@ -61,9 +62,9 @@ class RepoHandler:
         # TODO: Make moar pretty
         if 'https://github.com/' in self.config['clone_url']:
             r = requests.get('https://api.github.com/repos/' +
-                             # self.config['clone_url'][19:].split('.')[0]
+                             # self.configs['clone_url'][19:].split('.')[0]
                              # or
-                             # self.config['clone_url'][19:-4]
+                             # self.configs['clone_url'][19:-4]
                              # ?
                              self.config['clone_url'][19:].split('.')[0] +
                              '/commits?path=' +
@@ -83,12 +84,11 @@ class RepoHandler:
             else:
                 rmtree(ontology['web_directory'])
 
-        # Now generate new files
+        # Now generate_html_doc new files
         for ontology in self.config['ontologies']:
-            # contributors =
-
             if ontology['template'] is None or not exists(ontology['template']):
-                template = join(dirname(realpath(__file__)), 'templates',
+                template = join(dirname(realpath(__file__)),
+                                'templates',
                                 'default.html')
             else:
                 template = ontology['template']

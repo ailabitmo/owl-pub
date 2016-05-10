@@ -1,6 +1,13 @@
 jQuery(document).ready(function ($) {
     /* Sticky sidebar ("Table of contents") */
-    $(".sticky").sticky({topSpacing: 10});
+    jQuery(window).on('resize', function() {
+        onResize();
+    });
+    function onResize() {
+        if (jQuery(window).width() < 850) $(".sticky").unstick();
+        else $(".sticky").sticky({topSpacing: 10});
+    }
+    onResize();
 
     /* Branches switcher */
     $("#branch_switcher").change(function () {

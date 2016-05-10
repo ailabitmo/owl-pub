@@ -452,22 +452,22 @@ SELECT ?i WHERE {?i rdf:type ?c . ?c rdf:type <http://www.w3.org/2002/07/owl#Cla
 
     def render(self, data, template_path):
         """ Render HTML documentation for the ontology """
-        template_file = open(template_path, 'r')
         env = Environment(trim_blocks=True, lstrip_blocks=True)
         env.filters['md5filter'] = self.__md5_filter
         env.filters['anchorFromIRI'] = self.__anchor_from_iri
         env.filters['prefixed'] = self.__prefixed
         env.filters['hashed'] = self.__hashed
-        template = env.from_string(template_file.read())
+        with open(template_path, 'r') as template_file:
+            template = env.from_string(template_file.read())
         return template.render(data)
 
-    def generate(self, output_path, branches_info, template_path,
-                 preferred_language=u'en'):
+    def generate_html_doc(self, output_path, branches_info, template_path,
+                          preferred_language=u'en'):
         """ Generate HTML documentation for the ontology """
         data = self.extract(branches_info, preferred_language)
         rendered = self.render(data, template_path)
-        with codecs.open(output_path, encoding='utf-8', mode='w') as output:
-            output.write(rendered)
+        with codecs.open(output_path, encoding='utf-8', mode='w') as output_file:
+            output_file.write(rendered)
 
     def export(self, output_path, export_format):
         """ Export ontology to export_format from existing """
