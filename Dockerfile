@@ -10,6 +10,7 @@ RUN easy_install pip
 RUN pip install uwsgi
 
 COPY /src /home/owl-pub
+COPY /custom_templates /home/owl-pub/custom_templates
 COPY /configs/nginx.conf /etc/nginx/nginx.conf
 COPY /configs/uwsgi_params /etc/nginx/uwsgi_params
 COPY /ssl-certificates/* /etc/nginx/_ssl/
