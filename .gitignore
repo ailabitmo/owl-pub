@@ -4,6 +4,8 @@
 
 configs/*
 
+custom_templates/*
+
 ssl-certificates/*
 !ssl-certificates/README.md
 

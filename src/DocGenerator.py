@@ -22,24 +22,24 @@ class ExportError(Exception):
 
 
 class DocGenerator:
-    graph = None
-    ontology_iri = None
-    original_path = None
-    original_format = None
-    base_namespace = ''
-    prefix = ''
+    _graph = None
+    _ontology_iri = None
+    _original_path = None
+    _original_format = None
+    _prefix = ''
+    _base_namespace = ''
 
     def __init__(self, ontology_path):
-        self.graph = Graph()
-        self.graph.parse(ontology_path)
+        self._graph = Graph()
+        self._graph.parse(ontology_path)
 
-        for i in self.graph.namespaces():
+        for i in self._graph.namespaces():
             if i[0] == '':
-                self.base_namespace = i[1]
+                self._base_namespace = i[1]
 
-        self.original_path = ontology_path
-        self.original_format = splitext(basename(ontology_path))[1][1:]
-        self.ontology_iri = self.graph[::OWL.Ontology].next()[0]
+        self._original_path = ontology_path
+        self._original_format = splitext(basename(ontology_path))[1][1:]
+        self._ontology_iri = self._graph[::OWL.Ontology].next()[0]
 
     @staticmethod
     def __md5_filter(value):
@@ -59,68 +59,66 @@ class DocGenerator:
         return value if '/' in value else '#' + value
 
     def __prefixed(self, value):
-        return value if '/' in value else self.prefix + value
+        return value if '/' in value else self._prefix + value
 
     def __local_anchor_from_iri(self, full_iri):
         out = None
-        if full_iri is not None and self.ontology_iri in full_iri:
+        if full_iri is not None and self._ontology_iri in full_iri:
             out = self.__anchor_from_iri(full_iri)
         return full_iri if out is None else out
 
     def __extract_text(self, subject=None, predicate=None, obj=None,
                        language=u'en'):
         out = None
-        for i in self.graph[subject:predicate:obj]:
+        for i in self._graph[subject:predicate:obj]:
             if out is None or i.language == language:
                 out = urlize(i).replace('\n', '<br />')
         return self.__local_anchor_from_iri(out)
 
     def __extract_array(self, subject=None, predicate=None, obj=None):
         return [self.__local_anchor_from_iri(i)
-                for i in self.graph[subject:predicate:obj]]
+                for i in self._graph[subject:predicate:obj]]
 
     def __extract_bool(self, subject=None, predicate=None, obj=None):
-        out = self.__extract_text(subject=subject,
-                                  predicate=predicate,
-                                  obj=obj)
+        out = self.__extract_text(subject=subject, predicate=predicate, obj=obj)
         if out is not None and out.upper() == 'TRUE':
             return True
         return False
 
-    def extract(self, branches_info, preferred_language=u'en'):
+    def __extract_ontology_data(self, preferred_language=u'en'):
         data = {
-            'ontology_iri': self.ontology_iri,
+            'ontology_iri': self._ontology_iri,
             'ontology_title':
-                self.__extract_text(subject=self.ontology_iri,
+                self.__extract_text(subject=self._ontology_iri,
                                     predicate=DC.title,
                                     language=preferred_language),
             'ontology_creators':
-                self.__extract_array(subject=self.ontology_iri,
+                self.__extract_array(subject=self._ontology_iri,
                                      predicate=DC.creator),
             'ontology_contributors':
-                self.__extract_array(
-                    subject=self.ontology_iri, predicate=DC.contributor),
+                self.__extract_array(subject=self._ontology_iri,
+                                     predicate=DC.contributor),
             'ontology_date':
-                self.__extract_text(subject=self.ontology_iri,
+                self.__extract_text(subject=self._ontology_iri,
                                     predicate=DC.date,
                                     language=preferred_language),
             'ontology_version':
-                self.__extract_text(subject=self.ontology_iri,
+                self.__extract_text(subject=self._ontology_iri,
                                     predicate=OWL.versionInfo,
                                     language=preferred_language),
             'ontology_version_iri':
-                self.__extract_text(subject=self.ontology_iri,
+                self.__extract_text(subject=self._ontology_iri,
                                     predicate=OWL.versionIRI,
                                     language=preferred_language),
             'imported_ontologies':
-                self.__extract_array(subject=self.ontology_iri,
+                self.__extract_array(subject=self._ontology_iri,
                                      predicate=OWL.imports),
             'abstract':
-                self.__extract_text(subject=self.ontology_iri,
+                self.__extract_text(subject=self._ontology_iri,
                                     predicate=RDFS.comment,
                                     language=preferred_language),
             'introduction':
-                self.__extract_text(subject=self.ontology_iri,
+                self.__extract_text(subject=self._ontology_iri,
                                     predicate=DC.description,
                                     language=preferred_language),
             'classes': [],
@@ -128,7 +126,6 @@ class DocGenerator:
             'object_properties': [],
             'annotation_properties': [],
             'individuals': [],
-            'branches_info': branches_info
         }
 
         # Classes
@@ -136,10 +133,10 @@ class DocGenerator:
 
         tmp_array = []
         tmp_array_deprecated = []
-        tmp_array_iris = [iri for iri in self.graph[:RDF.type:RDFS.Class]
-                          if iri.startswith(self.base_namespace)] + \
-                         [iri for iri in self.graph[:RDF.type:OWL.Class]
-                          if iri.startswith(self.base_namespace)]
+        tmp_array_iris = [iri for iri in self._graph[:RDF.type:RDFS.Class]
+                          if iri.startswith(self._base_namespace)] + \
+                         [iri for iri in self._graph[:RDF.type:OWL.Class]
+                          if iri.startswith(self._base_namespace)]
 
         for iri in tmp_array_iris:
             if self.__extract_text(subject=iri,
@@ -149,7 +146,7 @@ class DocGenerator:
                                                 predicate=RDFS.comment,
                                                 language=preferred_language) \
                             is not None:
-                cls = {
+                class_ = {
                     'iri': iri,
                     'label':
                         self.__extract_text(subject=iri,
@@ -176,23 +173,22 @@ class DocGenerator:
                                             predicate=OWL.deprecated)
                 }
 
-                if cls['is_deprecated']:
-                    tmp_array_deprecated.append(cls)
+                if class_['is_deprecated']:
+                    tmp_array_deprecated.append(class_)
                 else:
-                    tmp_array.append(cls)
+                    tmp_array.append(class_)
 
-        data['classes'] = sorted(tmp_array,
-                                 key=operator.itemgetter('label')) + \
-                          sorted(tmp_array_deprecated,
-                                 key=operator.itemgetter('label'))
+        data['classes'] = \
+            sorted(tmp_array, key=operator.itemgetter('label')) + \
+            sorted(tmp_array_deprecated, key=operator.itemgetter('label'))
 
         # Data properties
         ########################################################################
 
         tmp_array = []
         tmp_array_deprecated = []
-        tmp_array_iris = [iri for iri, a in self.graph[::OWL.DatatypeProperty]
-                          if iri.startswith(self.base_namespace)]
+        tmp_array_iris = [iri for iri, a in self._graph[::OWL.DatatypeProperty]
+                          if iri.startswith(self._base_namespace)]
 
         for iri in tmp_array_iris:
             if self.__extract_text(subject=iri,
@@ -202,7 +198,7 @@ class DocGenerator:
                                                 predicate=RDFS.comment,
                                                 language=preferred_language) \
                             is not None:
-                dprop = {
+                data_property = {
                     'iri': iri,
                     'label':
                         self.__extract_text(subject=iri,
@@ -235,28 +231,25 @@ class DocGenerator:
                                             predicate=OWL.deprecated)
                 }
 
-                # print type(dprop['has_domain'][0])
-
-                if dprop['is_deprecated']:
-                    tmp_array_deprecated.append(dprop)
+                if data_property['is_deprecated']:
+                    tmp_array_deprecated.append(data_property)
                 else:
-                    tmp_array.append(dprop)
+                    tmp_array.append(data_property)
 
-        data['data_properties'] = sorted(tmp_array,
-                                         key=operator.itemgetter('label')) + \
-                                  sorted(tmp_array_deprecated,
-                                         key=operator.itemgetter('label'))
+        data['data_properties'] = \
+            sorted(tmp_array, key=operator.itemgetter('label')) + \
+            sorted(tmp_array_deprecated, key=operator.itemgetter('label'))
 
         # Object properties
         ########################################################################
 
         tmp_array = []
         tmp_array_deprecated = []
-        tmp_array_iris = [iri for iri, a in self.graph[::OWL.ObjectProperty]
-                          if iri.startswith(self.base_namespace)]
+        tmp_array_iris = [iri for iri, a in self._graph[::OWL.ObjectProperty]
+                          if iri.startswith(self._base_namespace)]
 
         for iri in tmp_array_iris:
-            oprop = {
+            object_property = {
                 'iri': iri,
                 'label': self.__extract_text(subject=iri,
                                              predicate=RDFS.label,
@@ -288,31 +281,32 @@ class DocGenerator:
                                         predicate=OWL.deprecated)
             }
 
-            if oprop['label'] is None:
-                for ii in self.graph[:RDFS.seeAlso:iri]:
-                    oprop['label'] = \
+            if object_property['label'] is None:
+                for ii in self._graph[:RDFS.seeAlso:iri]:
+                    object_property['label'] = \
                         self.__extract_text(subject=ii,
                                             predicate=RDFS.label,
                                             language=preferred_language)
 
-            if oprop['label'] is not None or oprop['comment'] is not None:
-                if oprop['is_deprecated']:
-                    tmp_array_deprecated.append(oprop)
+            if object_property['label'] is not None or \
+                            object_property['comment'] is not None:
+                if object_property['is_deprecated']:
+                    tmp_array_deprecated.append(object_property)
                 else:
-                    tmp_array.append(oprop)
+                    tmp_array.append(object_property)
 
-        data['object_properties'] = sorted(tmp_array,
-                                           key=operator.itemgetter('label')) + \
-                                    sorted(tmp_array_deprecated,
-                                           key=operator.itemgetter('label'))
+        data['object_properties'] = \
+            sorted(tmp_array, key=operator.itemgetter('label')) + \
+            sorted(tmp_array_deprecated, key=operator.itemgetter('label'))
 
         # Annotation properties
         ########################################################################
 
         tmp_array = []
         tmp_array_deprecated = []
-        tmp_array_iris = [iri for iri, a in self.graph[::OWL.AnnotationProperty]
-                          if iri.startswith(self.base_namespace)]
+        tmp_array_iris = [iri for iri, a in
+                          self._graph[::OWL.AnnotationProperty]
+                          if iri.startswith(self._base_namespace)]
 
         for iri in tmp_array_iris:
             if self.__extract_text(subject=iri,
@@ -322,7 +316,7 @@ class DocGenerator:
                                                 predicate=RDFS.comment,
                                                 language=preferred_language) \
                             is not None:
-                aprop = {
+                annotation_property = {
                     'iri': iri,
                     'label':
                         self.__extract_text(subject=iri,
@@ -355,16 +349,14 @@ class DocGenerator:
                                             predicate=OWL.deprecated)
                 }
 
-                if aprop['is_deprecated']:
-                    tmp_array_deprecated.append(aprop)
+                if annotation_property['is_deprecated']:
+                    tmp_array_deprecated.append(annotation_property)
                 else:
-                    tmp_array.append(aprop)
+                    tmp_array.append(annotation_property)
 
-        data['annotation_properties'] = sorted(tmp_array,
-                                               key=operator.itemgetter(
-                                                   'label')) + \
-                                        sorted(tmp_array_deprecated,
-                                               key=operator.itemgetter('label'))
+        data['annotation_properties'] = \
+            sorted(tmp_array, key=operator.itemgetter('label')) + \
+            sorted(tmp_array_deprecated, key=operator.itemgetter('label'))
 
         # Individuals
         ########################################################################
@@ -372,17 +364,7 @@ class DocGenerator:
         tmp_array = []
         tmp_array_deprecated = []
 
-        # tmp_array_iris = [iri for iri, a in self.graph[::OWL.NamedIndividual]
-        #                   if iri.startswith(self.base_namespace)]
-        # print len(tmp_array_iris)
-
-        # tmp_array_iris = [iri for iri in
-        #                   self.graph.query(
-        #                       'SELECT ?i ?c WHERE {?i rdf:type ?c} ')]
-        # print len(tmp_array_iris)
-
-        tmp_array_iris = [iri for iri in
-                          self.graph.query('''
+        tmp_array_iris = [iri for iri in self._graph.query('''
 SELECT ?i WHERE {?i rdf:type ?c . ?c rdf:type <http://www.w3.org/2002/07/owl#Class> . }
 ''')]
 
@@ -428,21 +410,20 @@ SELECT ?i WHERE {?i rdf:type ?c . ?c rdf:type <http://www.w3.org/2002/07/owl#Cla
                 else:
                     tmp_array.append(individual)
 
-        data['individuals'] = sorted(tmp_array,
-                                     key=operator.itemgetter('label')) + \
-                              sorted(tmp_array_deprecated,
-                                     key=operator.itemgetter('label'))
+        data['individuals'] = \
+            sorted(tmp_array, key=operator.itemgetter('label')) + \
+            sorted(tmp_array_deprecated, key=operator.itemgetter('label'))
 
         # Namespaces
         ########################################################################
 
         data['namespaces'] = []
 
-        for k, v in self.graph.namespaces():
+        for k, v in self._graph.namespaces():
             if k == '':
                 k = 'default'
-            if self.ontology_iri in v and k != 'default':
-                self.prefix = k + ':'
+            if self._ontology_iri in v and k != 'default':
+                self._prefix = k + ':'
             data['namespaces'].append((k, v))
 
         # return
@@ -450,7 +431,7 @@ SELECT ?i WHERE {?i rdf:type ?c . ?c rdf:type <http://www.w3.org/2002/07/owl#Cla
 
         return data
 
-    def render(self, data, template_path):
+    def __render_doc(self, data, template_path):
         """ Render HTML documentation for the ontology """
         env = Environment(trim_blocks=True, lstrip_blocks=True)
         env.filters['md5filter'] = self.__md5_filter
@@ -461,30 +442,32 @@ SELECT ?i WHERE {?i rdf:type ?c . ?c rdf:type <http://www.w3.org/2002/07/owl#Cla
             template = env.from_string(template_file.read())
         return template.render(data)
 
-    def generate_html_doc(self, output_path, branches_info, template_path,
-                          preferred_language=u'en'):
+    def generate_doc(self, output_path, branches_info, template_path,
+                     preferred_language=u'en'):
         """ Generate HTML documentation for the ontology """
-        data = self.extract(branches_info, preferred_language)
-        rendered = self.render(data, template_path)
-        with codecs.open(output_path, encoding='utf-8', mode='w') as output_file:
+        data = self.__extract_ontology_data(preferred_language)
+        data['branches_info'] = branches_info
+        rendered = self.__render_doc(data, template_path)
+        with codecs.open(output_path, encoding='utf-8', mode='w') \
+                as output_file:
             output_file.write(rendered)
 
     def export(self, output_path, export_format):
         """ Export ontology to export_format from existing """
         if export_format == 'owl':
-            if self.original_format == 'owl':
-                copy(self.original_path, output_path)
+            if self._original_format == 'owl':
+                copy(self._original_path, output_path)
             else:
-                self.graph.serialize(output_path, 'pretty-xml')
+                self._graph.serialize(output_path, 'pretty-xml')
         elif export_format == 'ttl':
-            if self.original_format == 'ttl':
-                copy(self.original_path, output_path)
+            if self._original_format == 'ttl':
+                copy(self._original_path, output_path)
             else:
-                self.graph.serialize(output_path, 'turtle')
+                self._graph.serialize(output_path, 'turtle')
         elif export_format == 'jsonld':
-            if self.original_format == 'jsonld':
-                copy(self.original_path, output_path)
+            if self._original_format == 'jsonld':
+                copy(self._original_path, output_path)
             else:
-                self.graph.serialize(output_path, 'json-ld')
+                self._graph.serialize(output_path, 'json-ld')
         else:
             raise ExportError('unexpected export format ' + str(export_format))

@@ -10,7 +10,7 @@ publisher = OwlPub()
 Webhook = Flask(__name__)
 
 
-def _check_secret(config):
+def __check_secret(config):
     signature = request.headers.get('X-Hub-Signature')
     if 'secret' in config and signature:
         secret = config['secret']
@@ -24,8 +24,6 @@ def _check_secret(config):
 
 @Webhook.route('/webhook', methods=['POST'])
 def handler_by_clone_url():
-    publisher.load_config()
-
     try:
         payload = json.loads(request.payload)
         full_name = payload['repository']['full_name']
@@ -33,7 +31,7 @@ def handler_by_clone_url():
     except RepositoryNotFoundError, e:
         raise e
 
-    _check_secret(repo.config)
+    __check_secret(repo.config)
 
     repo.sync()
     repo.regenerate()
@@ -43,14 +41,12 @@ def handler_by_clone_url():
 
 @Webhook.route('/webhook/<webhook_id>', methods=['POST', 'GET'])
 def handler_by_webhook_id(webhook_id):
-    publisher.load_config()
-
     try:
         repo = publisher.get_repo_by_webhook_id(int(webhook_id))
     except RepositoryNotFoundError as e:
         return str(e)
 
-    _check_secret(repo.config)
+    __check_secret(repo.config)
 
     repo.sync()
     repo.regenerate()

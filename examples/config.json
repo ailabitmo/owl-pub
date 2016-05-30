@@ -1,7 +1,8 @@
 {
+  "template_index": "default-index.html",
   "directories": {
-    "repos": "repos",
-    "web": "webroot"
+    "repos_dir": "repos",
+    "web_dir": "webroot"
   },
   "repos": [
     {
@@ -10,7 +11,8 @@
       "ontologies": [
         {
           "ontology": "food.owl",
-          "directory": "foodontology"
+          "webname_dir": "foodontology",
+          "template": "default.html"
         }
       ]
     },
@@ -21,7 +23,7 @@
       "ontologies": [
         {
           "ontology": "GoodRelations/GoodRelations.owl",
-          "directory": "GoodRelations"
+          "webname_dir": "GoodRelations"
         }
       ]
     }
