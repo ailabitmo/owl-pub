@@ -1,13 +1,11 @@
 FROM ubuntu
 MAINTAINER oleg_kuzmin
 
-ENV REFRESHED_AT 2016–05-05
+ENV REFRESHED_AT 2016–05-30
 
 RUN echo "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) main universe" >> /etc/apt/sources.list
 RUN apt-get update
-RUN apt-get install -y nginx python python-dev python-setuptools git
-RUN easy_install pip
-RUN pip install uwsgi
+RUN apt-get install -y nginx python3 python3-pip uwsgi uwsgi-plugin-python3 git
 
 COPY /src /home/owl-pub
 COPY /configs/config.json /home/owl-pub/config.json
@@ -16,10 +14,10 @@ COPY /configs/uwsgi_params /etc/nginx/uwsgi_params
 COPY /ssl-certificates/* /etc/nginx/_ssl/
 COPY /custom_templates /home/owl-pub/custom_templates
 
-RUN pip install -r /home/owl-pub/requirements.txt
+RUN pip3 install -r /home/owl-pub/requirements.txt
 
 EXPOSE 80
 
 WORKDIR /home/owl-pub
 
-CMD python OwlPub.py && service nginx start && uwsgi owl-pub.ini
+CMD python3 OwlPub.py && service nginx start && uwsgi owl-pub.ini

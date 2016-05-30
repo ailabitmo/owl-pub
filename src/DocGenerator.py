@@ -1,3 +1,6 @@
+#!/usr/bin/python3 -B
+# coding=utf-8
+
 import codecs
 import operator
 from hashlib import md5
@@ -39,7 +42,7 @@ class DocGenerator:
 
         self._original_path = ontology_path
         self._original_format = splitext(basename(ontology_path))[1][1:]
-        self._ontology_iri = self._graph[::OWL.Ontology].next()[0]
+        self._ontology_iri = next(self._graph[::OWL.Ontology])[0]
 
     @staticmethod
     def __md5_filter(value):
@@ -68,7 +71,7 @@ class DocGenerator:
         return full_iri if out is None else out
 
     def __extract_text(self, subject=None, predicate=None, obj=None,
-                       language=u'en'):
+                       language='en'):
         out = None
         for i in self._graph[subject:predicate:obj]:
             if out is None or i.language == language:
@@ -85,7 +88,7 @@ class DocGenerator:
             return True
         return False
 
-    def __extract_ontology_data(self, preferred_language=u'en'):
+    def __extract_ontology_data(self, preferred_language='en'):
         data = {
             'ontology_iri': self._ontology_iri,
             'ontology_title':
@@ -173,6 +176,9 @@ class DocGenerator:
                                             predicate=OWL.deprecated)
                 }
 
+                if class_['label'] is None:
+                    class_['label'] = 'None'
+
                 if class_['is_deprecated']:
                     tmp_array_deprecated.append(class_)
                 else:
@@ -231,6 +237,9 @@ class DocGenerator:
                                             predicate=OWL.deprecated)
                 }
 
+                if data_property['label'] is None:
+                    data_property['label'] = 'None'
+
                 if data_property['is_deprecated']:
                     tmp_array_deprecated.append(data_property)
                 else:
@@ -287,6 +296,8 @@ class DocGenerator:
                         self.__extract_text(subject=ii,
                                             predicate=RDFS.label,
                                             language=preferred_language)
+            if object_property['label'] is None:
+                object_property['label'] = 'None'
 
             if object_property['label'] is not None or \
                             object_property['comment'] is not None:
@@ -349,6 +360,9 @@ class DocGenerator:
                                             predicate=OWL.deprecated)
                 }
 
+                if annotation_property['label'] is None:
+                    annotation_property['label'] = 'None'
+
                 if annotation_property['is_deprecated']:
                     tmp_array_deprecated.append(annotation_property)
                 else:
@@ -405,6 +419,9 @@ SELECT ?i WHERE {?i rdf:type ?c . ?c rdf:type <http://www.w3.org/2002/07/owl#Cla
                                             predicate=OWL.deprecated)
                 }
 
+                if individual['label'] is None:
+                    individual['label'] = 'None'
+
                 if individual['is_deprecated']:
                     tmp_array_deprecated.append(individual)
                 else:
@@ -443,7 +460,7 @@ SELECT ?i WHERE {?i rdf:type ?c . ?c rdf:type <http://www.w3.org/2002/07/owl#Cla
         return template.render(data)
 
     def generate_doc(self, output_path, branches_info, template_path,
-                     preferred_language=u'en'):
+                     preferred_language='en'):
         """ Generate HTML documentation for the ontology """
         data = self.__extract_ontology_data(preferred_language)
         data['branches_info'] = branches_info

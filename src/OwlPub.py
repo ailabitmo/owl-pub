@@ -1,3 +1,6 @@
+#!/usr/bin/python3 -B
+# coding=utf-8
+
 import json
 from os.path import abspath, join, splitext, basename, realpath, dirname, exists
 
@@ -34,32 +37,30 @@ class OwlPub:
         self.__load_config()
 
     def __load_config(self):
-        config_path = join(dirname(realpath(__file__)), 'config.json')
-
-        with open(config_path) as config_file:
-            config = json.load(config_file)
-
         try:
-            self._dir_repos = abspath(config['directories']['repos_dir'])
-        except KeyError:
-            self._dir_repos = abspath('repos')
+            config_path = join(dirname(realpath(__file__)), 'config.json')
 
-        try:
-            self._dir_web = abspath(config['directories']['web_dir'])
-        except KeyError:
-            self._dir_web = abspath('webroot')
+            with open(config_path) as config_file:
+                config = json.load(config_file)
 
-        self._template_index = config['template_index'] \
-            if 'template_index' in config else None
+            try:
+                self._dir_repos = abspath(config['directories']['repos_dir'])
+            except KeyError:
+                self._dir_repos = abspath('repos')
 
-        for repo in config['repos']:
-            repo_config = self.__parse_repo_config(repo)
-            self._all_repos.append(repo_config)
+            try:
+                self._dir_web = abspath(config['directories']['web_dir'])
+            except KeyError:
+                self._dir_web = abspath('webroot')
 
-        try:
-            pass
+            self._template_index = config['template_index'] \
+                if 'template_index' in config else None
+
+            for repo in config['repos']:
+                repo_config = self.__parse_repo_config(repo)
+                self._all_repos.append(repo_config)
         except:
-            raise ParseConfigError(u'configs file invalid')
+            raise ParseConfigError('Configs file invalid')
 
     def __parse_repo_config(self, config):
         repo_name = splitext(basename(config['clone_url']))[0]
@@ -90,15 +91,15 @@ class OwlPub:
         for repo_config in self._all_repos:
             if repo_config['webhook_id'] == webhook_id:
                 return RepoHandler(repo_config)
-        raise RepositoryNotFoundError(
-            u'repository with webhook_id ' + str(webhook_id) + u' not found!')
+        raise RepositoryNotFoundError('Repository with webhook ID {} not found!'
+                                      .format(webhook_id))
 
     def get_repo_by_name(self, name):
         for repo_config in self._all_repos:
             if name + '.git' in repo_config['clone_url']:
                 return RepoHandler(repo_config)
-        raise RepositoryNotFoundError(u'repository with name ' +
-                                      str(name) + u' not found!')
+        raise RepositoryNotFoundError('Repository with name "{}" not found!'
+                                      .format(name))
 
     def run(self):
         # Data for index file

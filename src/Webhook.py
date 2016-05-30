@@ -1,5 +1,7 @@
+#!/usr/bin/python3 -B
+# coding=utf-8
+
 import hmac
-import json
 from hashlib import sha1
 
 from flask import Flask, request, abort
@@ -11,11 +13,14 @@ Webhook = Flask(__name__)
 
 
 def __check_secret(config):
-    signature = request.headers.get('X-Hub-Signature')
-    if 'secret' in config and signature:
+    if 'secret' in config:
+        signature = request.headers.get('X-Hub-Signature')
+        try:
+            signature = signature.split('=')[1]
+        except IndexError:
+            pass
         secret = config['secret']
-        signature = signature.split('=')[1]
-        if type(secret) == unicode:
+        if type(secret) == str:
             secret = secret.encode()
         mac = hmac.new(secret, msg=request.data, digestmod=sha1)
         if not hmac.compare_digest(mac.hexdigest(), signature):
@@ -25,15 +30,14 @@ def __check_secret(config):
 @Webhook.route('/webhook', methods=['POST'])
 def handler_by_clone_url():
     try:
-        payload = json.loads(request.payload)
+        payload = request.get_json()
         full_name = payload['repository']['full_name']
         repo = publisher.get_repo_by_name(full_name)
-    except RepositoryNotFoundError, e:
+    except RepositoryNotFoundError as e:
         raise e
 
     __check_secret(repo.config)
 
-    repo.sync()
     repo.regenerate()
 
     return 'OK'
@@ -48,7 +52,6 @@ def handler_by_webhook_id(webhook_id):
 
     __check_secret(repo.config)
 
-    repo.sync()
     repo.regenerate()
 
     return 'OK'

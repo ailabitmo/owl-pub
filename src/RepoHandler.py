@@ -1,3 +1,6 @@
+#!/usr/bin/python3 -B
+# coding=utf-8
+
 from os import makedirs
 from os.path import realpath, join, dirname, exists, splitext, basename
 from shutil import rmtree
@@ -21,7 +24,7 @@ class RepoHandler:
             self._repo = Repo.clone_from(config['clone_url'],
                                          config['directory'])
 
-        print(u'Repo {0:s}'.format(config['clone_url']))
+        print('Repo {}'.format(config['clone_url']))
 
         self._config = config
         self.sync()
@@ -45,7 +48,7 @@ class RepoHandler:
             makedirs(branches_info['branch_dir'])
 
         try:
-            print(u'Parsing {0:s}'.format(from_))
+            print('Parsing {0:s}'.format(from_))
 
             generator = DocGenerator(from_)
 
@@ -61,7 +64,7 @@ class RepoHandler:
                 template
             )
         except (SAXParseException, ParserError):
-            print(u'WARNING: Failed parsing {0:s}...'.format(from_))
+            print('WARNING: Failed parsing {}...'.format(from_))
 
     def __get_commits(self, ontology):
         # TODO: Make moar pretty
