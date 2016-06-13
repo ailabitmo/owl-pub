@@ -117,8 +117,11 @@
                     <select id="branch_switcher">
                         <option></option>
                         {% for branch in branches_info['other_branches'] %}
-                            <option value="../{{ branch }}/{{ branches_info['file_name'] }}.html">
-                                {{ branch }}
+                            <option value="./{% if branches_info['current_branch'] == 'master' -%}
+                                {{ branches_info['file_name'] -}}/
+                            {% endif -%}
+                            {% if branch != 'master' -%}{{ branch }}{% endif -%}">
+                                {{ branch -}}
                             </option>
                         {% endfor %}
                     </select>
@@ -679,7 +682,8 @@
         </div>
 
         {% if branches_info['commits'] %}
-            <div id="commits_info" class="content__inner content__inner--commits_info">
+            <div id="commits_info"
+                 class="content__inner content__inner--commits_info">
                 <h4>{{ tof_item_num }}. Commits</h4>
                 {% set tof_item_num = tof_item_num + 1 %}
 

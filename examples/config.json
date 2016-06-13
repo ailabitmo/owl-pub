@@ -1,5 +1,4 @@
 {
-  "template_index": "default-index.html",
   "directories": {
     "repos_dir": "repos",
     "web_dir": "webroot"
@@ -11,19 +10,28 @@
       "ontologies": [
         {
           "ontology": "food.owl",
-          "webname_dir": "foodontology",
-          "template": "default.html"
+          "webname_dir": "food"
+        }
+      ]
+    },
+    {
+      "clone_url": "https://github.com/VisualDataWeb/OWL2VOWL.git",
+      "webhook_id": 2,
+      "ontologies": [
+        {
+          "ontology": "ontologies/marinetlo.owl",
+          "webname_dir": "o2l"
         }
       ]
     },
     {
       "clone_url": "https://github.com/Logunov/OWL-Ontologies.git",
       "secret": "OyEZJG6gDxHFF4KTbWNq6vbc47dOxZaVURwCWfp3x71lFsdULg",
-      "webhook_id": 2,
+      "webhook_id": 3,
       "ontologies": [
         {
           "ontology": "GoodRelations/GoodRelations.owl",
-          "webname_dir": "GoodRelations"
+          "webname_dir": "gr"
         }
       ]
     }

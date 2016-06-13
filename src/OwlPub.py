@@ -115,11 +115,10 @@ class OwlPub:
             # TODO: Make moar pretty
             index_data_ontologies = []
             for ontology in repo_config['ontologies']:
-                name = ontology['webname_dir'].replace(self._dir_web, '')[1:]
-                path = name + '/master/' + \
-                       splitext(basename(ontology['ontology']))[0] + '.html'
-                if path.endswith('.git'):
-                    path = path[:-4]
+                name = splitext(basename(ontology['ontology']))[0]
+                path = ontology['webname_dir'].replace(
+                    self._dir_web, ''
+                )[1:] + '/' + name
                 index_data_ontologies.append({
                     'path': path,
                     'name': name
