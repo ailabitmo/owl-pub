@@ -4,7 +4,7 @@
 from os import makedirs
 from os.path import realpath, join, dirname, exists, splitext, basename
 from shutil import rmtree
-from xml.sax._exceptions import SAXParseException
+from xml.sax import SAXParseException
 
 import requests
 from git import Repo

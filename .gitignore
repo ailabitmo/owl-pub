@@ -3,8 +3,10 @@
 *.pyc
 
 configs/*
+!/configs/uwsgi_params
 
 custom_templates/*
+!custom_templates/README.md
 
 ssl-certificates/*
 !ssl-certificates/README.md
@@ -13,11 +15,3 @@ src/repos/*
 src/webroot/*
 
 src/config.json
-
-src/templates/*
-!src/templates/default.html
-!src/templates/default-index.html
-!src/templates/static/default.css
-!src/templates/static/default.js
-!src/templates/static/jquery.min.js
-!src/templates/static/jquery.sticky.js

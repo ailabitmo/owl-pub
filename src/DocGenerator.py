@@ -3,6 +3,7 @@
 
 import codecs
 import operator
+from datetime import datetime
 from hashlib import md5
 from os.path import splitext, basename
 from shutil import copy
@@ -33,15 +34,19 @@ class DocGenerator:
     _base_namespace = ''
 
     def __init__(self, ontology_path):
+        self._original_path = ontology_path
+        self._original_format = splitext(basename(ontology_path))[1][1:]
+
         self._graph = Graph()
-        self._graph.parse(ontology_path)
+        if self._original_format == 'owl':
+            self._graph.parse(ontology_path)
+        else:
+            self._graph.parse(ontology_path, format=self._original_format)
 
         for i in self._graph.namespaces():
             if i[0] == '':
                 self._base_namespace = i[1]
 
-        self._original_path = ontology_path
-        self._original_format = splitext(basename(ontology_path))[1][1:]
         self._ontology_iri = next(self._graph[::OWL.Ontology])[0]
 
     @staticmethod
@@ -464,6 +469,7 @@ SELECT ?i WHERE {?i rdf:type ?c . ?c rdf:type <http://www.w3.org/2002/07/owl#Cla
         """ Generate HTML documentation for the ontology """
         data = self.__extract_ontology_data(preferred_language)
         data['branches_info'] = branches_info
+        data['datetime_now'] = datetime.utcnow()
         rendered = self.__render_doc(data, template_path)
         with codecs.open(output_path, encoding='utf-8', mode='w') \
                 as output_file:

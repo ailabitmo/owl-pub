@@ -2,6 +2,7 @@
 # coding=utf-8
 
 import json
+from datetime import datetime
 from os.path import abspath, join, splitext, basename, realpath, dirname, exists
 
 from jinja2 import Environment
@@ -143,7 +144,10 @@ class OwlPub:
         with open(template_index_path, 'r') as template_index_file:
             template = env.from_string(template_index_file.read())
         with open(join(self._dir_web, 'index.html'), mode='w') as output_file:
-            output_file.write(template.render({'repos_info': index_data}))
+            output_file.write(template.render({
+                'repos_info': index_data,
+                'datetime_now': datetime.utcnow()
+            }))
 
 
 if __name__ == '__main__':

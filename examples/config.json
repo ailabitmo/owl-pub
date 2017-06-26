@@ -34,6 +34,16 @@
           "webname_dir": "gr"
         }
       ]
+    },
+    {
+      "clone_url": "https://github.com/semiotproject/ontologies.git",
+      "webhook_id": 4,
+      "ontologies": [
+        {
+          "ontology": "semiot/semiot.ttl",
+          "webname_dir": "semiot"
+        }
+      ]
     }
   ]
 }

@@ -12,12 +12,6 @@
     <script src="/_static/jquery.min.js"></script>
     <script src="/_static/jquery.sticky.js"></script>
     <script src="/_static/default.js"></script>
-
-    <link href="/home/ilya/dev/owl-pub/src/templates/static/default.css"
-          rel="stylesheet" type="text/css">
-    <script src="/home/ilya/dev/owl-pub/src/templates/static/jquery.min.js"></script>
-    <script src="/home/ilya/dev/owl-pub/src/templates/static/jquery.sticky.js"></script>
-    <script src="/home/ilya/dev/owl-pub/src/templates/static/default.js"></script>
 </head>
 <body class="template--doc">
 <header id="header" class="header">
@@ -118,9 +112,14 @@
                         <option></option>
                         {% for branch in branches_info['other_branches'] %}
                             <option value="./{% if branches_info['current_branch'] == 'master' -%}
-                                {{ branches_info['file_name'] -}}/
-                            {% endif -%}
-                            {% if branch != 'master' -%}{{ branch }}{% endif -%}">
+                                        {{ branches_info['file_name'] -}}/
+                                    {% endif -%}
+
+
+
+
+
+                                    {% if branch != 'master' -%}{{ branch }}{% endif -%}">
                                 {{ branch -}}
                             </option>
                         {% endfor %}
@@ -711,6 +710,7 @@
         {% endif %}
     </div>
 </div>
-<footer id="footer" class="footer">owl-pub @ ITMO University 2016</footer>
+<footer id="footer" class="footer">owl-pub @ ITMO
+    University {{ datetime_now['year'] }}</footer>
 </body>
 </html>
