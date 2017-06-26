@@ -2,7 +2,7 @@
 A framework for publishing and managing OWL ontologies
 
 # Installation using a Docker
-q##### 1. Clone
+##### 1. Clone
 ```bash
 git clone https://github.com/ailabitmo/owl-pub.git && cd owl-pub
 ```
